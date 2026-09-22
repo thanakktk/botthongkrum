@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XAUUSD Bar Replay</title>
+<style>
+:root{
+  --bg:#0a0e16; --card:#121a2b; --card2:#0e1626; --bd:#212c42; --bd2:#2c3a56;
+  --fg:#e6edf6; --mut:#8493ad; --grn:#2ec27e; --red:#f25268; --yel:#e0a93b;
+  --blu:#4d9fff; --pur:#9d7bff; --grn-bg:rgba(46,194,126,.14); --red-bg:rgba(242,82,104,.14);
+  --mono:ui-monospace,"JetBrains Mono",Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.5 -apple-system,"Segoe UI",Roboto,sans-serif}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--bd);background:var(--card2)}
+header h1{font-size:15px;margin:0 10px 0 0;white-space:nowrap}
+.grp{display:flex;align-items:center;gap:6px;padding-right:10px;border-right:1px solid var(--bd)}
+.grp:last-child{border-right:none}
+input,select,button{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--bd2);border-radius:7px;padding:5px 8px}
+input[type=number]{width:92px;font-family:var(--mono)}
+button{cursor:pointer;white-space:nowrap}
+button:hover{border-color:var(--blu)}
+button.buy{background:var(--grn);border-color:var(--grn);color:#04130b;font-weight:700}
+button.sell{background:var(--red);border-color:var(--red);color:#1a0508;font-weight:700}
+button.pri{background:var(--blu);border-color:var(--blu);color:#04101f;font-weight:600}
+button.sm{padding:2px 7px;font-size:12px}
+.clock{font-family:var(--mono);color:var(--yel);min-width:150px}
+main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;padding:12px 16px}
+#chart{height:calc(100vh - 330px);min-height:360px;border:1px solid var(--bd);border-radius:10px;overflow:hidden;position:relative}
+.hint{position:absolute;left:10px;top:8px;z-index:3;font-size:12px;color:var(--mut);pointer-events:none}
+aside{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:11px 12px}
+.card h3{margin:0 0 8px;font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:var(--mut)}
+.row{display:flex;align-items:center;gap:6px;margin:5px 0}
+.row label{min-width:62px;color:var(--mut)}
+.row input{flex:1;min-width:0}
+.kv{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-family:var(--mono)}
+.kv span:nth-child(odd){color:var(--mut);font-family:inherit}
+.pos{color:var(--grn)} .neg{color:var(--red)} .mut{color:var(--mut)}
+.bid-ask{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.bid-ask button{padding:9px 4px}
+.bid-ask small{display:block;font-family:var(--mono);font-weight:500}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+th,td{padding:4px 6px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}
+th{color:var(--mut);font-weight:500;font-family:-apple-system,"Segoe UI",sans-serif}
+th:first-child,td:first-child{text-align:left}
+.tablewrap{overflow:auto;max-height:240px}
+section.bottom{padding:0 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#botOut{font-size:12px;white-space:pre-wrap;max-height:210px;overflow:auto;font-family:var(--mono);color:var(--fg)}
+.tag{display:inline-block;padding:1px 7px;border-radius:99px;font-size:11px;font-weight:700}
+.tag.b{background:var(--grn-bg);color:var(--grn)} .tag.s{background:var(--red-bg);color:var(--red)}
+.seg{display:flex;border:1px solid var(--bd2);border-radius:7px;overflow:hidden}
+.seg button{border:none;border-radius:0;background:transparent;padding:4px 9px}
+.seg button.on{background:var(--bd2)}
+@media (max-width:980px){
+  main{grid-template-columns:1fr} section.bottom{grid-template-columns:1fr}
+  #chart{height:60vh}
+  .grp{border-right:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>🕯️ XAUUSD Bar Replay</h1>
+  <div class="grp">
+    <input type="datetime-local" id="startAt" title="จุดเริ่ม (เวลา server ของข้อมูล)">
+    <select id="tf"><option>M15</option><option>M30</option><option selected>H1</option><option>H4</option><option>D1</option></select>
+    <button id="btnLoad">▶ เริ่มจากวันที่นี้</button>
+    <button id="btnRandom" title="สุ่มวันที่ — ฝึกแบบไม่รู้อนาคต">🎲 สุ่ม</button>
+  </div>
+  <div class="grp">
+    <button id="btnStep" title="เดิน 1 แท่งของ TF ที่เลือก (→)">▶| 1 แท่ง</button>
+    <button id="btnFine" title="เดินทีละ 15 นาที (Shift+→)">+15m</button>
+    <button id="btnPlay" title="เล่น/หยุด (Space)">▶ เล่น</button>
+    <select id="speed" title="ความเร็ว (แท่ง/วินาที)">
+      <option value="1">1×</option><option value="2" selected>2×</option><option value="5">5×</option><option value="10">10×</option><option value="25">25×</option>
+    </select>
+    <label class="mut"><input type="checkbox" id="stopOnFill" checked> หยุดเมื่อโดน SL/TP</label>
+  </div>
+  <div class="grp"><span class="clock" id="clock">—</span></div>
+</header>
+
+<main>
+  <div id="chart"><div class="hint" id="hint">คลิกช่อง SL / TP / ราคา แล้วคลิกบนกราฟเพื่อใส่ราคา</div></div>
+  <aside>
+    <div class="card">
+      <h3>บัญชี (จำลอง)</h3>
+      <div class="kv">
+        <span>Balance</span><b id="kBal">—</b>
+        <span>Equity</span><b id="kEq">—</b>
+        <span>Floating</span><b id="kFloat">—</b>
+        <span>เทรด / WR</span><b id="kWr">—</b>
+        <span>Profit factor</span><b id="kPf">—</b>
+        <span>Max DD</span><b id="kDd">—</b>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>ส่งออเดอร์</h3>
+      <div class="row">
+        <div class="seg" id="typeSeg">
+          <button data-t="market" class="on">Market</button>
+          <button data-t="limit">Limit</button>
+          <button data-t="stop">Stop</button>
+        </div>
+      </div>
+      <div class="row" id="rowPrice" style="display:none"><label>ราคา</label><input type="number" step="0.01" id="fPrice" data-pick></div>
+      <div class="row">
+        <div class="seg" id="sizeSeg">
+          <button data-s="risk" class="on">Risk %</button>
+          <button data-s="lots">Lots</button>
+        </div>
+        <input type="number" step="0.05" id="fSize" value="0.5" title="Risk % ของ balance หรือ จำนวน lot">
+      </div>
+      <div class="row"><label>SL</label><input type="number" step="0.01" id="fSl" data-pick placeholder="ราคา SL"></div>
+      <div class="row"><label>TP</label><input type="number" step="0.01" id="fTp" data-pick placeholder="ราคา TP (ว่างได้)"></div>
+      <div class="row mut" id="sizeInfo">—</div>
+      <div class="bid-ask">
+        <button class="sell" id="btnSell">SELL<small id="bidP">—</small></button>
+        <button class="buy" id="btnBuy">BUY<small id="askP">—</small></button>
+      </div>
+      <div class="row mut" style="margin-top:8px">
+        Spread <input type="number" step="0.01" id="fSpread" value="0.44" style="width:70px"> · 1 lot = 100 oz
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🤖 บอทคิดยังไง ณ แท่งนี้</h3>
+      <div class="row"><button class="pri" id="btnBot">ถามบอท</button>
+        <label class="mut"><input type="checkbox" id="autoBot"> ถามทุกแท่ง</label>
+        <button class="sm" id="btnUseBot" style="display:none">ใช้ตามบอท</button></div>
+      <div id="botOut" class="mut">กลยุทธ์ robust-4 + confluence M30/H1/H4 ชุดเดียวกับบอทจริง</div>
+    </div>
+  </aside>
+</main>
+
+<section class="bottom">
+  <div class="card">
+    <h3>ออเดอร์เปิด / รอ <button class="sm" id="btnCloseAll" style="float:right">ปิดทั้งหมด</button></h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>#</th><th>ฝั่ง</th><th>Lot</th><th>ราคา</th><th>SL</th><th>TP</th><th>P/L</th><th></th></tr></thead>
+      <tbody id="tOpen"></tbody></table></div>
+  </div>
+  <div class="card">
+    <h3>ประวัติเทรด <button class="sm" id="btnCsv" style="float:right">⬇ CSV</button></h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>ปิดเมื่อ</th><th>ฝั่ง</th><th>Lot</th><th>เข้า</th><th>ออก</th><th>เหตุผล</th><th>R</th><th>P/L</th></tr></thead>
+      <tbody id="tHist"></tbody></table></div>
+  </div>
+</section>
+
+<script src="/web/vendor/lightweight-charts.standalone.production.js"></script>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const TF_SECS = {M15:900, M30:1800, H1:3600, H4:14400, D1:86400};
+const CONTRACT = 100, START_BAL = 100000;
+
+// ---------------- state ----------------
+const S = {
+  tf: "H1", bars: [], cur: -1, loadingMore: false, playing: null,
+  balance: START_BAL, peakEq: START_BAL, maxDd: 0,
+  positions: [], pendings: [], closed: [], nextId: 1,
+  type: "market", sizeMode: "risk", pickField: null, lastBot: null,
+};
+
+// ---------------- chart ----------------
+const chart = LightweightCharts.createChart($("chart"), {
+  layout: {background: {color: "#0c1220"}, textColor: "#8493ad"},
+  grid: {vertLines: {color: "#162036"}, horzLines: {color: "#162036"}},
+  rightPriceScale: {borderColor: "#212c42"},
+  timeScale: {borderColor: "#212c42", timeVisible: true, rightOffset: 12},
+  crosshair: {mode: LightweightCharts.CrosshairMode.Normal},
+  autoSize: true,
+});
+const series = chart.addCandlestickSeries({
+  upColor: "#2ec27e", downColor: "#f25268", borderVisible: false,
+  wickUpColor: "#2ec27e", wickDownColor: "#f25268",
+});
+let lines = [];
+
+chart.subscribeClick(p => {
+  if (!p.point || !S.pickField) return;
+  const price = series.coordinateToPrice(p.point.y);
+  if (price == null) return;
+  S.pickField.value = price.toFixed(2);
+  S.pickField.dispatchEvent(new Event("input"));
+});
+document.querySelectorAll("[data-pick]").forEach(el => el.addEventListener("focus", () => {
+  S.pickField = el;
+  $("hint").textContent = `คลิกบนกราฟเพื่อใส่ราคาในช่อง ${el.id === "fSl" ? "SL" : el.id === "fTp" ? "TP" : "ราคา"}`;
+}));
+
+// ---------------- helpers ----------------
+const fmt = (n, d = 2) => n == null || isNaN(n) ? "—" : Number(n).toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d});
+const money = n => (n >= 0 ? "+" : "") + fmt(n);
+const cls = n => n > 0 ? "pos" : n < 0 ? "neg" : "";
+const tstr = t => new Date(t * 1000).toISOString().slice(0, 16).replace("T", " ");
+const spread = () => Math.max(0, parseFloat($("fSpread").value) || 0);
+const bar = () => S.bars[S.cur];
+const bidOf = mid => mid - spread() / 2;
+const askOf = mid => mid + spread() / 2;
+const dir = side => side === "buy" ? 1 : -1;
+const pnlOf = (p, exit) => dir(p.side) * (exit - p.entry) * p.lots * CONTRACT;
+const closePx = (p, mid) => p.side === "buy" ? bidOf(mid) : askOf(mid);
+const num = id => { const v = parseFloat($(id).value); return isNaN(v) ? null : v; };
+
+async function api(path) {
+  const r = await fetch(path);
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
+  return r.json();
+}
+const toCandle = b => ({time: b[0], open: b[1], high: b[2], low: b[3], close: b[4]});
+
+// ---------------- loading ----------------
+// The replay clock ALWAYS runs on M15 (S.bars = M15, S.cur = last revealed M15
+// bar). The chart TF is only a view: M15 bars are aggregated client-side, so a
+// higher-TF candle forms live (never reveals its future part) and SL/TP are
+// checked at M15 resolution whatever TF is on screen.
+const M15 = 900;
+const bucketOf = t => t - t % TF_SECS[S.tf];
+
+async function load(startT, tf) {
+  stopPlay();
+  S.tf = tf;
+  // ~125 days of history: enough for 300 H4 candles / 125 D1 candles
+  const d = await api(`/api/bars?tf=M15&start=${startT}&before=12000&after=4000`);
+  S.bars = d.bars;
+  S.cur = Math.max(0, d.cursor - 1);
+  redraw();
+  chart.timeScale().scrollToRealTime();
+  renderAll();
+}
+
+// rebuild the displayed candles from the revealed M15 bars (load / TF change)
+function redraw() {
+  const out = [];
+  for (let i = 0; i <= S.cur; i++) mergeInto(out, S.bars[i]);
+  series.setData(out);
+  S.lastCandle = out[out.length - 1] || null;
+}
+
+function mergeInto(out, b) {
+  const t = bucketOf(b[0]), last = out[out.length - 1];
+  if (last && last.time === t) {
+    last.high = Math.max(last.high, b[2]); last.low = Math.min(last.low, b[3]); last.close = b[4];
+    return last;
+  }
+  const c = {time: t, open: b[1], high: b[2], low: b[3], close: b[4]};
+  out.push(c);
+  return c;
+}
+
+async function ensureMore() {
+  if (S.cur < S.bars.length - 200 || S.loadingMore) return;
+  S.loadingMore = true;
+  try {
+    const last = S.bars[S.bars.length - 1][0];
+    const d = await api(`/api/bars?tf=M15&start=${last + 1}&before=0&after=4000`);
+    S.bars.push(...d.bars.filter(b => b[0] > last));
+  } finally { S.loadingMore = false; }
+}
+
+// the moment the replay has revealed up to (close of the last M15 bar)
+const revealedUntil = () => bar() ? bar()[0] + M15 : null;
+
+// ---------------- simulation ----------------
+function advanceM15() {
+  if (S.cur >= S.bars.length - 1) { ensureMore(); return null; }
+  S.cur++;
+  const b = bar();
+  const arr = S.lastCandle ? [S.lastCandle] : [];
+  S.lastCandle = mergeInto(arr, b);
+  series.update({...S.lastCandle});
+  return processBar(b);
+}
+
+// one step = until the on-screen candle closes (or 15 minutes if `fine`)
+function step(fine = false) {
+  let hit = false;
+  for (let guard = 0; guard < 200; guard++) {
+    const r = advanceM15();
+    if (r === null) break;
+    hit = hit || r;
+    const next = S.bars[S.cur + 1];
+    if (fine || !next || bucketOf(next[0]) !== bucketOf(bar()[0])) break;
+    if (hit && $("stopOnFill").checked) break;
+  }
+  ensureMore();
+  renderAll();
+  if ($("autoBot").checked) askBot();
+  return hit;
+}
+
+// b = [t,o,h,l,c] (mid prices). Pending fills first, then SL/TP of positions
+// that were open BEFORE this bar (stop-first if both are touched).
+function processBar(b) {
+  const [t, o, h, l] = b, half = spread() / 2;
+  let hit = false;
+  const openedNow = new Set();
+  for (const pd of [...S.pendings]) {
+    const askO = o + half, bidO = o - half;
+    let fill = null;
+    if (pd.side === "buy" && pd.type === "limit" && l + half <= pd.price) fill = Math.min(pd.price, askO);
+    if (pd.side === "buy" && pd.type === "stop" && h + half >= pd.price) fill = Math.max(pd.price, askO);
+    if (pd.side === "sell" && pd.type === "limit" && h - half >= pd.price) fill = Math.max(pd.price, bidO);
+    if (pd.side === "sell" && pd.type === "stop" && l - half <= pd.price) fill = Math.min(pd.price, bidO);
+    if (fill != null) {
+      S.pendings = S.pendings.filter(x => x !== pd);
+      const p = openPosition(pd.side, pd.lots, fill, pd.sl, pd.tp, t, pd.type);
+      openedNow.add(p.id); hit = true;
+    }
+  }
+  for (const p of [...S.positions]) {
+    if (openedNow.has(p.id)) continue;
+    const buy = p.side === "buy";
+    // side-correct extremes: a buy exits on the bid, a sell on the ask
+    const lo = buy ? l - half : l + half, hi = buy ? h - half : h + half, op = buy ? o - half : o + half;
+    const slHit = p.sl != null && (buy ? lo <= p.sl : hi >= p.sl);
+    const tpHit = p.tp != null && (buy ? hi >= p.tp : lo <= p.tp);
+    if (slHit) {                                   // gap through SL -> fill at open
+      const px = buy ? Math.min(p.sl, op) : Math.max(p.sl, op);
+      closePosition(p, px, t, "SL"); hit = true;
+    } else if (tpHit) {
+      const px = buy ? Math.max(p.tp, op) : Math.min(p.tp, op);
+      closePosition(p, px, t, "TP"); hit = true;
+    }
+  }
+  return hit;
+}
+
+function openPosition(side, lots, entry, sl, tp, t, how) {
+  const p = {id: S.nextId++, side, lots, entry, sl, tp, openT: t, how,
+             risk: sl != null ? Math.abs(entry - sl) * lots * CONTRACT : null};
+  S.positions.push(p);
+  return p;
+}
+
+function closePosition(p, exit, t, reason) {
+  const pnl = pnlOf(p, exit);
+  S.balance += pnl;
+  S.positions = S.positions.filter(x => x !== p);
+  S.closed.push({...p, exit, exitT: t, reason, pnl, r: p.risk ? pnl / p.risk : null});
+}
+
+function floating() {
+  const b = bar(); if (!b) return 0;
+  return S.positions.reduce((s, p) => s + pnlOf(p, closePx(p, b[4])), 0);
+}
+
+// ---------------- order ticket ----------------
+function sizeFor(entry, sl) {
+  const v = parseFloat($("fSize").value);
+  if (!(v > 0)) return null;
+  if (S.sizeMode === "lots") return Math.round(v * 100) / 100;
+  if (sl == null || sl === entry) return null;
+  const lots = S.balance * (v / 100) / (Math.abs(entry - sl) * CONTRACT);
+  return Math.max(0.01, Math.floor(lots * 100) / 100);
+}
+
+function validate(side, entry, sl, tp) {
+  if (sl != null && dir(side) * (entry - sl) <= 0) return `SL ต้องอยู่${side === "buy" ? "ต่ำกว่า" : "สูงกว่า"}ราคาเข้า`;
+  if (tp != null && dir(side) * (tp - entry) <= 0) return `TP ต้องอยู่${side === "buy" ? "สูงกว่า" : "ต่ำกว่า"}ราคาเข้า`;
+  return null;
+}
+
+function submit(side) {
+  const b = bar(); if (!b) return;
+  const sl = num("fSl"), tp = num("fTp");
+  if (S.type === "market") {
+    const entry = side === "buy" ? askOf(b[4]) : bidOf(b[4]);
+    const err = validate(side, entry, sl, tp); if (err) return alert(err);
+    const lots = sizeFor(entry, sl);
+    if (!lots) return alert("โหมด Risk % ต้องใส่ SL ก่อน (หรือเปลี่ยนเป็น Lots)");
+    openPosition(side, lots, entry, sl, tp, revealedUntil(), "market");
+  } else {
+    const price = num("fPrice"); if (price == null) return alert("ใส่ราคาของ pending order");
+    const mid = b[4];
+    // limit = better than market, stop = worse than market
+    const ok = S.type === "limit" ? (side === "buy" ? price < askOf(mid) : price > bidOf(mid))
+                                  : (side === "buy" ? price > askOf(mid) : price < bidOf(mid));
+    if (!ok) return alert(`${side.toUpperCase()} ${S.type.toUpperCase()} ต้องตั้งราคา${(S.type === "limit") === (side === "buy") ? "ต่ำกว่า" : "สูงกว่า"}ราคาตลาด`);
+    const err = validate(side, price, sl, tp); if (err) return alert(err);
+    const lots = sizeFor(price, sl);
+    if (!lots) return alert("โหมด Risk % ต้องใส่ SL ก่อน (หรือเปลี่ยนเป็น Lots)");
+    S.pendings.push({id: S.nextId++, side, type: S.type, price, lots, sl, tp});
+  }
+  renderAll();
+}
+
+// ---------------- bot ----------------
+async function askBot() {
+  const asof = revealedUntil(); if (!asof) return;
+  $("botOut").textContent = "กำลังคิด…";
+  try {
+    const eq = S.balance + floating();
+    const d = await api(`/api/bot?asof=${asof}&equity=${eq.toFixed(2)}`);
+    if (d.asof !== revealedUntil()) return;            // replay moved on
+    S.lastBot = d;
+    let txt = `ณ ${tstr(asof)}  →  ${d.order ? "เข้าออเดอร์ " + d.order.side.toUpperCase() : "ไม่เข้า"}`;
+    if (!d.order && d.why) txt += `  (${d.why})`;
+    txt += `\nสัญญาณ ${d.signals.length} ตัว:`;
+    for (const s of d.signals) txt += `\n  ${s.tf.padEnd(3)} ${s.strategy} ${s.dir} conf=${s.conf}`;
+    if (d.order) {
+      const o = d.order;
+      txt += `\n\nEntry ${fmt(o.entry)}  SL ${fmt(o.sl)}  TP1 ${fmt(o.tp1)}  TP ${fmt(o.tp)}\nlot ${o.volume}  risk $${fmt(o.risk)}\n\n${o.rationale}`;
+    }
+    $("botOut").textContent = txt;
+    $("botOut").className = "";
+    $("btnUseBot").style.display = d.order ? "" : "none";
+  } catch (e) { $("botOut").textContent = "บอทตอบไม่ได้: " + e.message; }
+}
+
+function useBot() {
+  const o = S.lastBot && S.lastBot.order; if (!o) return;
+  setType("market");
+  $("fSl").value = o.sl.toFixed(2);
+  $("fTp").value = o.tp != null ? o.tp.toFixed(2) : "";
+  setSize("risk"); $("fSize").value = "0.3";
+  renderTicket();
+  (o.side === "buy" ? $("btnBuy") : $("btnSell")).focus();
+}
+
+// ---------------- rendering ----------------
+function renderLines() {
+  lines.forEach(l => series.removePriceLine(l)); lines = [];
+  const add = (price, color, title, style = 2) => price != null && lines.push(
+    series.createPriceLine({price, color, lineWidth: 1, lineStyle: style, axisLabelVisible: true, title}));
+  for (const p of S.positions) {
+    add(p.entry, "#4d9fff", `#${p.id} ${p.side} ${p.lots}`, 0);
+    add(p.sl, "#f25268", `SL #${p.id}`);
+    add(p.tp, "#2ec27e", `TP #${p.id}`);
+  }
+  for (const p of S.pendings) {
+    add(p.price, "#e0a93b", `#${p.id} ${p.side} ${p.type}`, 1);
+    add(p.sl, "rgba(242,82,104,.6)", `SL #${p.id}`, 3);
+    add(p.tp, "rgba(46,194,126,.6)", `TP #${p.id}`, 3);
+  }
+}
+
+function renderMarkers() {
+  const last = S.lastCandle ? S.lastCandle.time : 0;
+  const snap = t => Math.min(last, bucketOf(t));
+  const m = [];
+  for (const p of [...S.closed, ...S.positions]) {
+    m.push({time: snap(p.openT), position: p.side === "buy" ? "belowBar" : "aboveBar",
+            color: p.side === "buy" ? "#2ec27e" : "#f25268",
+            shape: p.side === "buy" ? "arrowUp" : "arrowDown", text: `#${p.id}`});
+    if (p.exitT) m.push({time: snap(p.exitT), position: "inBar", shape: "circle",
+                         color: p.pnl >= 0 ? "#2ec27e" : "#f25268", text: `${p.reason} ${money(p.pnl)}`});
+  }
+  m.sort((a, b) => a.time - b.time);
+  series.setMarkers(m);
+}
+
+function renderStats() {
+  const fl = floating(), eq = S.balance + fl;
+  S.peakEq = Math.max(S.peakEq, eq);
+  S.maxDd = Math.max(S.maxDd, (S.peakEq - eq) / S.peakEq);
+  const c = S.closed, wins = c.filter(x => x.pnl > 0);
+  const gw = wins.reduce((s, x) => s + x.pnl, 0), gl = -c.filter(x => x.pnl <= 0).reduce((s, x) => s + x.pnl, 0);
+  $("kBal").textContent = fmt(S.balance);
+  $("kEq").textContent = fmt(eq);
+  $("kFloat").innerHTML = `<span class="${cls(fl)}">${money(fl)}</span>`;
+  $("kWr").textContent = c.length ? `${c.length} / ${Math.round(wins.length / c.length * 100)}%` : "0 / —";
+  $("kPf").textContent = gl > 0 ? fmt(gw / gl) : (gw > 0 ? "∞" : "—");
+  $("kDd").textContent = (S.maxDd * 100).toFixed(2) + "%";
+}
+
+function renderTables() {
+  const b = bar();
+  $("tOpen").innerHTML = [
+    ...S.positions.map(p => {
+      const pl = b ? pnlOf(p, closePx(p, b[4])) : 0;
+      return `<tr><td>${p.id}</td><td><span class="tag ${p.side[0]}">${p.side}</span></td><td>${p.lots}</td>
+        <td>${fmt(p.entry)}</td><td>${fmt(p.sl)}</td><td>${fmt(p.tp)}</td>
+        <td class="${cls(pl)}">${money(pl)}</td><td><button class="sm" data-close="${p.id}">ปิด</button></td></tr>`;
+    }),
+    ...S.pendings.map(p => `<tr class="mut"><td>${p.id}</td><td><span class="tag ${p.side[0]}">${p.side} ${p.type}</span></td>
+        <td>${p.lots}</td><td>${fmt(p.price)}</td><td>${fmt(p.sl)}</td><td>${fmt(p.tp)}</td><td>รอ</td>
+        <td><button class="sm" data-cancel="${p.id}">ยกเลิก</button></td></tr>`),
+  ].join("") || `<tr><td colspan="8" class="mut">ไม่มี</td></tr>`;
+  $("tHist").innerHTML = S.closed.slice().reverse().map(x => `<tr><td>${tstr(x.exitT)}</td>
+    <td><span class="tag ${x.side[0]}">${x.side}</span></td><td>${x.lots}</td><td>${fmt(x.entry)}</td><td>${fmt(x.exit)}</td>
+    <td>${x.reason}</td><td>${x.r == null ? "—" : x.r.toFixed(2)}</td><td class="${cls(x.pnl)}">${money(x.pnl)}</td></tr>`).join("")
+    || `<tr><td colspan="8" class="mut">ยังไม่มีเทรด</td></tr>`;
+}
+
+function renderTicket() {
+  const b = bar();
+  if (!b) return;
+  $("bidP").textContent = fmt(bidOf(b[4]));
+  $("askP").textContent = fmt(askOf(b[4]));
+  const sl = num("fSl");
+  const side = sl != null && sl > b[4] ? "sell" : "buy";
+  const entry = S.type === "market" ? (side === "buy" ? askOf(b[4]) : bidOf(b[4])) : num("fPrice");
+  if (entry == null) { $("sizeInfo").textContent = "—"; return; }
+  const lots = sizeFor(entry, sl);
+  const risk = lots && sl != null ? Math.abs(entry - sl) * lots * CONTRACT : null;
+  const tp = num("fTp");
+  const rr = sl != null && tp != null ? Math.abs(tp - entry) / Math.abs(entry - sl) : null;
+  $("sizeInfo").textContent = lots
+    ? `≈ ${lots} lot · เสี่ยง ${risk != null ? "$" + fmt(risk) : "— (ไม่มี SL)"}${rr ? ` · R:R 1:${rr.toFixed(2)}` : ""}`
+    : "ใส่ SL เพื่อคำนวณ lot จาก Risk %";
+}
+
+function renderAll() {
+  const b = bar();
+  $("clock").textContent = b ? `${tstr(revealedUntil())}  ${S.tf}` : "—";
+  renderLines(); renderMarkers(); renderStats(); renderTables(); renderTicket();
+}
+
+// ---------------- playback ----------------
+function stopPlay() {
+  if (S.playing) clearInterval(S.playing);
+  S.playing = null; $("btnPlay").textContent = "▶ เล่น";
+}
+function togglePlay() {
+  if (S.playing) return stopPlay();
+  $("btnPlay").textContent = "⏸ หยุด";
+  S.playing = setInterval(() => {
+    const hit = step();
+    if (hit && $("stopOnFill").checked) stopPlay();
+  }, 1000 / parseFloat($("speed").value));
+}
+$("speed").onchange = () => { if (S.playing) { stopPlay(); togglePlay(); } };
+
+// ---------------- controls ----------------
+function setType(t) {
+  S.type = t;
+  document.querySelectorAll("#typeSeg button").forEach(x => x.classList.toggle("on", x.dataset.t === t));
+  $("rowPrice").style.display = t === "market" ? "none" : "";
+  renderTicket();
+}
+function setSize(s) {
+  S.sizeMode = s;
+  document.querySelectorAll("#sizeSeg button").forEach(x => x.classList.toggle("on", x.dataset.s === s));
+  $("fSize").value = s === "risk" ? "0.5" : "0.10";
+  $("fSize").step = s === "risk" ? "0.05" : "0.01";
+  renderTicket();
+}
+document.querySelectorAll("#typeSeg button").forEach(b => b.onclick = () => setType(b.dataset.t));
+document.querySelectorAll("#sizeSeg button").forEach(b => b.onclick = () => setSize(b.dataset.s));
+["fSl", "fTp", "fPrice", "fSize", "fSpread"].forEach(id => $(id).addEventListener("input", renderTicket));
+
+$("btnBuy").onclick = () => submit("buy");
+$("btnSell").onclick = () => submit("sell");
+$("btnStep").onclick = () => { stopPlay(); step(); };
+$("btnFine").onclick = () => { stopPlay(); step(true); };
+$("btnPlay").onclick = togglePlay;
+$("btnBot").onclick = askBot;
+$("btnUseBot").onclick = useBot;
+$("btnCloseAll").onclick = () => {
+  const b = bar(); if (!b) return;
+  S.positions.slice().forEach(p => closePosition(p, closePx(p, b[4]), revealedUntil(), "manual"));
+  S.pendings = []; renderAll();
+};
+document.querySelector("section.bottom").addEventListener("click", e => {
+  const b = bar();
+  const c = e.target.dataset.close, x = e.target.dataset.cancel;
+  if (c && b) { const p = S.positions.find(p => p.id == c); if (p) closePosition(p, closePx(p, b[4]), revealedUntil(), "manual"); }
+  if (x) S.pendings = S.pendings.filter(p => p.id != x);
+  if (c || x) renderAll();
+});
+
+// TF is only a view over the M15 clock: re-aggregate, nothing to reload
+$("tf").onchange = () => { S.tf = $("tf").value; redraw(); renderAll(); };
+const startFromInput = () => Math.floor(new Date($("startAt").value + ":00Z").getTime() / 1000);
+function resetAccount() {
+  Object.assign(S, {balance: START_BAL, peakEq: START_BAL, maxDd: 0, positions: [], pendings: [], closed: [], nextId: 1, lastBot: null});
+  $("botOut").textContent = "—"; $("btnUseBot").style.display = "none";
+}
+$("btnLoad").onclick = () => {
+  if (!$("startAt").value) return alert("เลือกวันเวลาเริ่มก่อน");
+  resetAccount(); load(startFromInput(), $("tf").value);
+};
+$("btnRandom").onclick = async () => {
+  const d = await api("/api/random_start");
+  $("startAt").value = new Date(d.start * 1000).toISOString().slice(0, 16);
+  resetAccount(); load(d.start, $("tf").value);
+};
+$("btnCsv").onclick = () => {
+  const head = "id,side,lots,open_time,entry,sl,tp,close_time,exit,reason,r,pnl";
+  const rows = S.closed.map(x => [x.id, x.side, x.lots, tstr(x.openT), x.entry.toFixed(2), x.sl ?? "", x.tp ?? "",
+    tstr(x.exitT), x.exit.toFixed(2), x.reason, x.r == null ? "" : x.r.toFixed(3), x.pnl.toFixed(2)].join(","));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([[head, ...rows].join("\n")], {type: "text/csv"}));
+  a.download = `replay_trades_${Date.now()}.csv`; a.click();
+};
+document.addEventListener("keydown", e => {
+  if (["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName)) return;
+  if (e.key === "ArrowRight") { e.preventDefault(); stopPlay(); step(e.shiftKey); }
+  if (e.key === " ") { e.preventDefault(); togglePlay(); }
+});
+
+// ---------------- boot ----------------
+(async () => {
+  const m = await api("/api/meta");
+  const start = m.last - 60 * 86400;             // default: ~2 months before the data ends
+  $("startAt").value = new Date((start - start % 3600) * 1000).toISOString().slice(0, 16);
+  await load(start - start % 3600, "H1");
+})().catch(e => { $("clock").textContent = "โหลดข้อมูลไม่ได้: " + e.message; });
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+=== 11-YEAR VARIANT SWEEP: XAUUSD 2015-2026 (258,220 M15) ===
+robust-4 + confluence | per-year, pooled | risk 0.3%
+variant                      trades   WR%    avgR  +yrs  meanRet%
+raw (no mgmt)                  1703    38  +0.050  7/11     +1.22
+tp1@1.0 + eBE@0.8 (live)       1963    57  +0.034  6/11     +1.11
+tp1@1.0 (no early-BE)          1882    52  +0.042  6/11     +1.17
+B: tp1@0.8 bank-early          1918    56  +0.029  6/11     +0.99
+A: tp1@1.5 give-room           1800    45  +0.061  7/11     +1.42
+A: tp1@2.0 more-room           1747    41  +0.068  8/11     +1.71
+C: min_er 0.3                  1675    50  +0.015  4/11     -0.11
+C: min_er 0.4                  1421    50  +0.014  6/11     +0.10
+C: min_er 0.5                  1012    52  +0.037  5/11     +0.86

@@ -1,0 +1,21 @@
+=== EDGE VALIDATION (IS/OOS): XAUUSD ===
+M5 bars 40,000  IS=2025-11-21->2026-04-20  OOS=2026-04-20->2026-06-19
+
+--- PER STRATEGY: in-sample vs out-of-sample (pooled M30/H1/H4) ---
+strategy                IS_n  IS_avgR  OOS_n  OOS_avgR   robust?
+macd_trend               293     0.09    132      0.06   ROBUST
+fair_value_gap           378     0.09    186     -0.04   fragile(OOS<=0)
+roc_momentum             287     0.07    116      0.22   ROBUST
+donchian_breakout        264     0.06    116      0.16   ROBUST
+liquidity_sweep_rever    457     0.04    239     -0.25   fragile(OOS<=0)
+breakout_sr              320     0.03    140      0.27   ROBUST
+order_block_retest       518     0.03    251     -0.10   fragile(OOS<=0)
+keltner_reversion        463    -0.02    230     -0.14   weak
+rsi_reversal             401    -0.02    192     -0.01   weak
+ema_cross_momentum       174    -0.05     85      0.10   weak
+bollinger_squeeze_bre    233    -0.05    104      0.16   weak
+bollinger_reversion      515    -0.11    231     -0.13   weak
+pivot_bounce             399    -0.17    184     -0.04   weak
+
+=== ROBUST SURVIVORS (4): macd_trend, roc_momentum, donchian_breakout, breakout_sr ===
+(positive expectancy in BOTH the train and the unseen test window)

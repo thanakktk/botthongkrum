@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FTMO Trading Monitor</title>
+<link rel="stylesheet" href="/web/style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo">▲</span><h1>FTMO Monitor</h1></div>
+  <span id="dot" class="dot"></span>
+  <span id="hdr" class="sub"></span>
+  <span class="chip spacer" id="session">🕑 —</span>
+  <span class="chip" id="clock">—</span>
+</header>
+
+<div class="tiles" id="summary"></div>
+<div id="symbar" class="symbar"></div>
+<div id="pricewrap" style="padding:10px 18px 0">
+  <div class="card full pricecard" style="margin:0">
+    <div class="price-head">
+      <h2 id="price-title">📈 LIVE</h2>
+      <div id="price-legend" class="price-legend"></div>
+    </div>
+    <div id="lwchart" class="lwchart"></div>
+    <div id="price-status" class="muted price-status">connecting to MT5 for live price…</div>
+  </div>
+</div>
+<div class="grid" id="grid"></div>
+
+<script src="/web/vendor/lightweight-charts.standalone.production.js"></script>
+<script src="/web/app.js"></script>
+</body></html>

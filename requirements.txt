@@ -1,0 +1,9 @@
+# Install into a venv:  python -m venv env
+#                       ./env/Scripts/python.exe -m pip install -r requirements.txt
+MetaTrader5==5.0.5735        # Windows-only; needs the MT5 terminal installed
+psycopg[binary]==3.3.4       # PostgreSQL driver (v3)
+python-dotenv==1.2.2         # load .env
+tzdata==2026.2               # IANA tz db (Windows zoneinfo has none) -> Europe/Prague
+fastapi==0.138.0             # dashboard API
+uvicorn[standard]==0.49.0    # dashboard server
+numpy==2.4.6                 # research/ (strategy_lab, sizing_sim)

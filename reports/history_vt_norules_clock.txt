@@ -1,0 +1,18 @@
+=== MULTI-YEAR VALIDATION: XAUUSD M15 2015-2026 (258,220 bars) ===
+Config: preset=live robust-4 + confluence + regime=ANY tp1=2.0R early-BE=off | risk 0.3%
+Rules: NO equity floors (per-trade risk sizing only)
+
+year      bars  trades   WR%    PF    ret%    avgR  maxDD%  breach
+2015     23361     164    30  0.77   -5.13  -0.118     7.3      no
+2016     23538     201    39  1.01   +0.13  -0.028     3.2      no
+2017     23439     117    32  0.77   -3.13  -0.114     3.6      no
+2018     23487      90    33  0.77   -2.58  -0.008     2.9      no
+2019     23475     148    40  0.96   -0.62  +0.011     3.6      no
+2020     23611     224    39  1.17   +5.09  +0.062     3.9      no
+2021     23581     162    36  1.03   +0.61  +0.020     3.8      no
+2022     23653     189    42  1.11   +2.50  +0.034     2.5      no
+2023     23558     152    34  0.96   -0.64  -0.066     5.4      no
+2024     23738     162    37  1.16   +3.23  +0.023     2.5      no
+2025     21508     185    43  1.19   +4.40  +0.157     2.8      no
+
+OVERALL: 1794 trades across 11 years | WR=38% | avgR=+0.005 | positive years=6/11

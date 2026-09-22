@@ -1,0 +1,24 @@
+# Secrets — never commit
+.env
+*.env
+!.env.example
+
+# Python venv & caches
+env/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Local data / logs
+*.log
+*.sqlite
+
+# Pre-VT backup (contains an old .env) and Claude Code local state
+.bak_prevt/
+.claude/settings.local.json
+
+# Backtest data: only the continuous M15 CSV is used (25 MB); the per-year M1
+# folders are ~400 MB and never read by any script.
+backtest/XAUUSD (*)/
+reports/*_run.log

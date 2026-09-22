@@ -1,0 +1,85 @@
+=== EDGE ANALYSIS: XAUUSD ===
+M5 bars: 40,000  (2025-11-21 -> 2026-06-19)  | TFs: M30, H1, H4 | target 2.5R / stop 1R | costs spread=0.44 | min_n=20
+
+--- PER STRATEGY x TIMEFRAME (ranked by expectancy avgR) ---
+strategy              family    TF       n   WR%    PF   avgR  maeR  mfeR  verdict
+bollinger_squeeze_bre Volatilit H4      25    56  1.81   0.44  0.68  1.43  KEEP
+fair_value_gap        SMC/ICT   H4      75    45  1.30   0.36  0.88  1.60  KEEP
+macd_trend            Momentum  H4      38    53  2.27   0.32  0.86  1.27  KEEP
+roc_momentum          Momentum  H1     133    40  1.21   0.20  0.99  1.46  KEEP
+breakout_sr           S/R       H4      41    49  1.30   0.20  0.81  1.28  KEEP
+order_block_retest    SMC/ICT   H4      71    41  2.01   0.20  1.18  1.36  KEEP
+macd_trend            Momentum  H1     132    36  1.47   0.19  1.00  1.38  KEEP
+ema_cross_momentum    Momentum  H4      21    48  1.33   0.18  0.78  1.20  KEEP
+fair_value_gap        SMC/ICT   H1     178    38  1.29   0.17  1.00  1.42  KEEP
+donchian_breakout     S/R       H4      31    52  1.35   0.16  0.85  1.35  KEEP
+roc_momentum          Momentum  H4      71    44  1.14   0.15  0.91  1.25  KEEP
+breakout_sr           S/R       H1     139    35  1.00   0.12  1.01  1.39  WATCH
+donchian_breakout     S/R       H1     117    35  0.97   0.12  1.07  1.37  WATCH
+breakout_sr           S/R       M30    284    34  1.08   0.10  1.06  1.33  WATCH
+donchian_breakout     S/R       M30    235    34  1.10   0.09  1.05  1.32  KEEP
+rsi_reversal          Oscillato H1     193    34  1.25   0.09  1.10  1.34  KEEP
+liquidity_sweep_rever SMC/ICT   H4      64    38  1.30   0.05  1.27  1.39  KEEP
+bollinger_squeeze_bre Volatilit M30    222    32  1.14   0.05  0.98  1.32  WATCH
+roc_momentum          Momentum  M30    201    31  0.94   0.04  1.06  1.30  WATCH
+pivot_bounce          S/R       H4      57    35  0.89   0.04  1.10  1.26  WATCH
+ema_cross_momentum    Momentum  M30    161    30  0.97   0.02  1.04  1.42  WATCH
+keltner_reversion     Volatilit H1     226    31  1.16   0.01  1.18  1.32  WATCH
+order_block_retest    SMC/ICT   M30    464    30  0.95  -0.01  1.23  1.40  CUT
+macd_trend            Momentum  M30    255    30  1.00  -0.03  1.09  1.30  CUT
+ema_cross_momentum    Momentum  H1      81    36  1.00  -0.03  0.97  1.27  CUT
+bollinger_reversion   Volatilit H1     209    31  1.19  -0.04  1.38  1.36  CUT
+liquidity_sweep_rever SMC/ICT   H1     216    30  1.01  -0.06  1.36  1.30  CUT
+rsi_reversal          Oscillato M30    348    29  0.97  -0.07  1.14  1.26  CUT
+fair_value_gap        SMC/ICT   M30    309    28  0.95  -0.07  1.13  1.33  CUT
+liquidity_sweep_rever SMC/ICT   M30    425    29  0.96  -0.08  1.31  1.34  CUT
+order_block_retest    SMC/ICT   H1     243    29  0.91  -0.09  1.29  1.45  CUT
+keltner_reversion     Volatilit M30    412    28  0.96  -0.09  1.25  1.29  CUT
+pivot_bounce          S/R       M30    343    28  0.72  -0.11  1.19  1.28  CUT
+bollinger_squeeze_bre Volatilit H1      95    32  0.71  -0.14  1.05  1.29  CUT
+bollinger_reversion   Volatilit M30    479    27  0.79  -0.15  1.39  1.30  CUT
+bollinger_reversion   Volatilit H4      61    26  0.71  -0.17  1.18  1.09  CUT
+rsi_reversal          Oscillato H4      57    32  1.09  -0.18  1.05  1.04  CUT
+keltner_reversion     Volatilit H4      60    27  0.75  -0.19  1.32  1.20  CUT
+pivot_bounce          S/R       H1     187    25  0.60  -0.23  1.22  1.25  CUT
+
+--- PER STRATEGY (pooled across M30/H1/H4) ---
+strategy                   n   WR%    PF   avgR  verdict
+breakout_sr              464    36  1.08   0.12  WATCH
+roc_momentum             405    36  1.07   0.11  WATCH
+donchian_breakout        383    36  1.08   0.11  WATCH
+macd_trend               425    34  1.31   0.07  KEEP
+fair_value_gap           562    33  1.13   0.06  KEEP
+bollinger_squeeze_bre    342    34  1.07   0.02  WATCH
+ema_cross_momentum       263    33  1.02   0.02  WATCH
+order_block_retest       778    31  1.07  -0.01  CUT
+rsi_reversal             598    31  1.09  -0.03  CUT
+liquidity_sweep_rever    705    30  1.03  -0.06  CUT
+keltner_reversion        698    29  0.99  -0.06  CUT
+bollinger_reversion      749    28  0.88  -0.12  CUT
+pivot_bounce             587    28  0.70  -0.13  CUT
+
+--- BY SESSION (all techniques pooled) ---
+session           n   WR%    PF   avgR
+asian+londo     600    36  1.45   0.16
+ny             1873    34  1.06   0.02
+asian          2078    31  0.94  -0.00
+london          744    28  1.08  -0.07
+off-session     584    28  1.10  -0.08
+london+ny      1080    30  0.86  -0.08
+
+--- BY REGIME (all techniques pooled) ---
+regime            n   WR%    PF   avgR
+trend          3105    32  1.06   0.01
+range          3854    31  1.00  -0.03
+
+--- TP/SL PLACEMENT (MFE/MAE) ---
+winners: avg MFE 2.68R (median 2.67R) — how far runners go (TP2 is 2.5R)
+losers : avg MFE 0.71R — how green they got BEFORE reversing into the stop (>1R ⇒ a TP1/break-even would have saved many)
+losers : avg MAE 1.49R (stop is at 1.0R)
+
+=== RECOMMENDATIONS (data-driven) ===
+KEEP (7): ema_cross_momentum, breakout_sr, macd_trend, donchian_breakout, bollinger_squeeze_breakout, roc_momentum, fair_value_gap
+CUT  (6): bollinger_reversion, rsi_reversal, keltner_reversion, pivot_bounce, order_block_retest, liquidity_sweep_reversal
+Best sessions (positive avgR): asian
+TP guidance: winners' median MFE ≈ 2.7R (current TP2=2.5R) — set TP2 near where runners actually stall.
