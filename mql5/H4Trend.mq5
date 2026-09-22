@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//| H4Trend.mq5 — XAUUSD H4 trend/breakout bot (port of the Python   |
+//| H4Trend.mq5 - XAUUSD H4 trend/breakout bot (port of the Python   |
 //| "H4 Trend bot": breakout_sr + donchian_breakout + roc_momentum)  |
 //|                                                                  |
 //| Each strategy trades ALONE (its own magic number, at most ONE    |
@@ -16,7 +16,7 @@
 //+------------------------------------------------------------------+
 #property copyright "botthongkrum"
 #property link      "https://github.com/thanakktk/botthongkrum"
-#property version   "1.00"
+#property version   "1.10"
 #property strict
 
 #include <Trade\Trade.mqh>
@@ -50,7 +50,8 @@ input long   MagicBase       = 525600;  // +1 brk, +2 don, +3 roc
 input int    Slippage        = 30;      // points
 input bool   SignalDump      = false;   // tester: write every signal to a CSV
 input string DumpFile        = "h4trend_signals.csv";
-input string DiscordWebhook  = "";      // optional (whitelist the URL in Tools>Options>Expert Advisors)
+input string DiscordWebhook  = "";      // optional (whitelist https://discord.com in Tools>Options>Expert Advisors)
+input int    MaxSignalAgeMin = 90;      // skip a closed-bar signal older than this (late attach / restart)
 
 //--- strategy ids
 #define S_BRK 1
@@ -89,6 +90,10 @@ int OnInit()
    }
    PrintFormat("H4Trend init: cap0=%.2f peak=%.2f halted=%d tf=%s", GVget("cap0"), GVget("peak"),
                (int)GVget("halted", 0), EnumToString(_Period));
+   if(!MQLInfoInteger(MQL_TESTER))
+      Notify("EA online", StringFormat("%s %s | balance %.2f | equity %.2f | risk %.2f%%/trade",
+             _Symbol, EnumToString(_Period), AccountInfoDouble(ACCOUNT_BALANCE),
+             AccountInfoDouble(ACCOUNT_EQUITY), RiskPct), 0x3498DB);
    return INIT_SUCCEEDED;
 }
 
@@ -226,7 +231,12 @@ void OpenTrade(int s, int dir, double entry, double sl, double tp)
       GVset("st_" + IntegerToString(ticket), 0);              // 0 running, 1 tp1_hit
       GVset("v0_" + IntegerToString(ticket), lots);
       PrintFormat("%s %s %.2f @ %.2f sl %.2f tp %.2f (R=%.2f)", StratName(s), dir > 0 ? "BUY" : "SELL", lots, fill, sl, tp, rdist);
-      Notify(StringFormat("%s %s %.2f lots @ %.2f | SL %.2f TP %.2f", StratName(s), dir > 0 ? "BUY" : "SELL", lots, fill, sl, tp));
+      double tp1 = fill + dir * TP1_R * rdist;
+      Notify(StringFormat("%s OPEN %s %.2f lot", dir > 0 ? "BUY" : "SELL", _Symbol, lots),
+             StringFormat("strategy: %s\nentry: %.2f\nSL: %.2f  (risk $%.2f)\nTP1: %.2f  (bank %.0f%% + SL to break-even)\nTP2: %.2f\nticket #%I64u",
+                          StratName(s), fill, sl, rdist * lots * SymbolInfoDouble(_Symbol, SYMBOL_TRADE_CONTRACT_SIZE),
+                          tp1, PartialPct * 100, tp, ticket),
+             dir > 0 ? 0x2ECC71 : 0xE67E22);
    }
 }
 
@@ -265,7 +275,9 @@ void ManagePosition(ulong ticket)
       trade.PositionModify(ticket, be, tp);
       GVset("st_" + k, 1);
       PrintFormat("#%I64u TP1 hit: banked %.2f, SL->BE %.2f", ticket, part, be);
-      Notify(StringFormat("#%I64u TP1 hit - banked %.2f lots, SL -> break-even %.2f", ticket, part, be));
+      Notify(StringFormat("TP1 HIT #%I64u", ticket),
+             StringFormat("%s %s @ %.2f\nclosed %.2f lot at %.2f, runner %.2f lot\nSL moved to break-even %.2f, trailing %.1fR toward TP2 %.2f",
+                          d > 0 ? "BUY" : "SELL", _Symbol, entry, part, px, vol - part, be, TrailR, tp), 0xF1C40F);
       return;
    }
    // state 1: trail the runner
@@ -299,19 +311,82 @@ bool HardStopTripped()
       for(int s = S_BRK; s <= S_ROC; s++) { ulong t; if(FindPosition(s, t)) trade.PositionClose(t); }
       GVset("halted", 1);
       Print("HARD STOP: equity <= ", cap0 * (1.0 - HardStopPct), " -> all closed, trading halted. Delete GV '", GV("halted"), "' to resume.");
-      Notify("HARD STOP tripped - all positions closed, EA halted");
+      Notify("HARD STOP", StringFormat("equity %.2f <= %.2f -> all positions closed, EA halted",
+             AccountInfoDouble(ACCOUNT_EQUITY), cap0 * (1.0 - HardStopPct)), 0xE74C3C);
       return true;
    }
    return false;
 }
 
-void Notify(const string text)
+//+------------------------------------------------------------------+
+//| Discord: one embed per event (title / description / colour)      |
+//+------------------------------------------------------------------+
+string JsonEscape(string s)
 {
-   if(DiscordWebhook == "") return;
-   string body = "{\"content\":\"" + _Symbol + " H4Trend: " + text + "\"}";
+   StringReplace(s, "\\", "\\\\");
+   StringReplace(s, "\"", "\\\"");
+   StringReplace(s, "\n", "\\n");
+   return s;
+}
+
+void Notify(const string title, const string text, const int clr)
+{
+   if(DiscordWebhook == "" || MQLInfoInteger(MQL_TESTER)) return;
+   string body = StringFormat("{\"embeds\":[{\"title\":\"%s\",\"description\":\"%s\",\"color\":%d,"
+                              "\"footer\":{\"text\":\"H4Trend | %s | %s\"}}]}",
+                              JsonEscape(title), JsonEscape(text), clr, _Symbol,
+                              TimeToString(TimeCurrent(), TIME_DATE | TIME_MINUTES));
    char data[], result[]; string headers;
-   StringToCharArray(body, data, 0, StringLen(body));
-   WebRequest("POST", DiscordWebhook, "Content-Type: application/json\r\n", 5000, data, result, headers);
+   StringToCharArray(body, data, 0, StringLen(body), CP_UTF8);
+   int rc = WebRequest("POST", DiscordWebhook, "Content-Type: application/json\r\n", 5000, data, result, headers);
+   if(rc == -1)
+      PrintFormat("Discord: WebRequest failed (%d) - add https://discord.com in Tools>Options>Expert Advisors>Allow WebRequest", GetLastError());
+}
+
+//+------------------------------------------------------------------+
+//| Close alerts: every deal that takes volume OUT of one of our      |
+//| positions (SL / TP / trailing stop / partial / manual)            |
+//+------------------------------------------------------------------+
+void OnTradeTransaction(const MqlTradeTransaction &trans, const MqlTradeRequest &request, const MqlTradeResult &result)
+{
+   if(trans.type != TRADE_TRANSACTION_DEAL_ADD) return;
+   if(!HistoryDealSelect(trans.deal)) return;
+   long magic = HistoryDealGetInteger(trans.deal, DEAL_MAGIC);
+   if(magic < MagicBase + S_BRK || magic > MagicBase + S_ROC) return;
+   long entryType = HistoryDealGetInteger(trans.deal, DEAL_ENTRY);
+   if(entryType != DEAL_ENTRY_OUT && entryType != DEAL_ENTRY_OUT_BY) return;
+
+   ulong  posId  = (ulong)HistoryDealGetInteger(trans.deal, DEAL_POSITION_ID);
+   double px     = HistoryDealGetDouble(trans.deal, DEAL_PRICE);
+   double vol    = HistoryDealGetDouble(trans.deal, DEAL_VOLUME);
+   double profit = HistoryDealGetDouble(trans.deal, DEAL_PROFIT) + HistoryDealGetDouble(trans.deal, DEAL_SWAP)
+                 + HistoryDealGetDouble(trans.deal, DEAL_COMMISSION);
+   long   reason = HistoryDealGetInteger(trans.deal, DEAL_REASON);
+   long   dtype  = HistoryDealGetInteger(trans.deal, DEAL_TYPE);      // closing deal type is opposite of the position
+   string side   = (dtype == DEAL_TYPE_SELL) ? "BUY" : "SELL";
+   bool   partial = PositionSelectByTicket(posId);                     // still open -> partial close (TP1)
+
+   // entry price / time from the position's opening deal
+   double entry = 0; datetime opened = 0;
+   if(HistorySelectByPosition(posId))
+      for(int i = 0; i < HistoryDealsTotal(); i++)
+      {
+         ulong d = HistoryDealGetTicket(i);
+         if(HistoryDealGetInteger(d, DEAL_ENTRY) == DEAL_ENTRY_IN)
+         { entry = HistoryDealGetDouble(d, DEAL_PRICE); opened = (datetime)HistoryDealGetInteger(d, DEAL_TIME); break; }
+      }
+   string why = reason == DEAL_REASON_SL ? "STOP LOSS" : reason == DEAL_REASON_TP ? "TAKE PROFIT" :
+                reason == DEAL_REASON_SO ? "STOP OUT (margin)" : reason == DEAL_REASON_EXPERT ? "EA" : "MANUAL/OTHER";
+   if(reason == DEAL_REASON_SL && entry > 0 && ((side == "BUY" && px > entry) || (side == "SELL" && px < entry)))
+      why = "TRAILING STOP (profit)";
+   if(partial && reason == DEAL_REASON_EXPERT) return;                 // TP1 partial: its own alert already sent
+   long held = opened > 0 ? (TimeCurrent() - opened) / 60 : 0;
+   string strat = StratName((int)(magic - MagicBase));
+   Notify(StringFormat("%s CLOSE #%I64u  %s%.2f", profit >= 0 ? "PROFIT" : "LOSS", posId, profit >= 0 ? "+" : "", profit),
+          StringFormat("%s %s %.2f lot (%s)\nentry: %.2f -> exit: %.2f\nreason: %s\nheld: %dh %02dm\nbalance: %.2f",
+                       side, _Symbol, vol, strat, entry, px, why, (int)(held / 60), (int)(held % 60),
+                       AccountInfoDouble(ACCOUNT_BALANCE)),
+          profit >= 0 ? 0x2ECC71 : 0xE74C3C);
 }
 
 //+------------------------------------------------------------------+
@@ -328,6 +403,10 @@ void OnTick()
    if(bt == g_lastBar) return;
    g_lastBar = bt;
    CleanupMeta();
+   // the signal belongs to the bar that just closed; if we are seeing it late
+   // (EA attached / terminal restarted mid-bar) the backtested entry is gone
+   if(MaxSignalAgeMin > 0 && !MQLInfoInteger(MQL_TESTER) && TimeCurrent() - bt > MaxSignalAgeMin * 60)
+   { PrintFormat("closed-bar signal is %d min old (> %d) - skipped", (int)((TimeCurrent() - bt) / 60), MaxSignalAgeMin); return; }
 
    MqlRates r[];
    ArraySetAsSeries(r, true);
@@ -349,3 +428,4 @@ void OnTick()
    }
 }
 //+------------------------------------------------------------------+
+
