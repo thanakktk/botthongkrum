@@ -27,6 +27,20 @@
 > `run_xau_robust.ps1` เป็นบอทรุ่นเก่า (confluence, edge ≈ 0) และ `run_xau_vote.ps1` ถูกปิดไว้
 > (ขาดทุนทุกช่วงตลาด). **นี่คือ demo เท่านั้น — ยังไม่ผ่านการรันจริงนานพอ อย่าใช้เงินจริง.**
 >
+> **รัน 24 ชม. บน Windows VPS (ไม่ต้องมีความรู้):** เช่า VPS Windows Server (2 vCPU / 8 GB, เช่น Contabo
+> "Cloud VPS" + Windows, ~$10–20/เดือน) → Remote Desktop เข้าไป (Win+R → `mstsc` → IP, user
+> Administrator) → เปิด PowerShell **แบบ Run as administrator** แล้ววาง:
+>
+> ```powershell
+> Set-ExecutionPolicy Bypass -Scope Process -Force
+> irm https://raw.githubusercontent.com/thanakktk/botthongkrum/main/vps_setup.ps1 | iex
+> ```
+>
+> สคริปต์ติดตั้ง Python, PostgreSQL (ไม่ใช้ Docker), โปรเจกต์ และตั้งค่าเครื่องให้เอง เหลือ 2 อย่างที่ต้องทำเอง:
+> ติดตั้ง MT5 ของ VT Markets + ล็อกอิน + กด Algo Trading, และใส่ login/password ใน `C:\bot\.env`
+> แล้วรัน `C:\bot\vps_finish.ps1` → บอทจะเริ่มเองทุกครั้งที่เครื่องเปิด และ relaunch เองถ้าตาย
+> (`autostart_h4.ps1`). ออกจาก Remote Desktop ด้วยการ**ปิดหน้าต่าง** (disconnect) ห้าม Sign out.
+>
 > Backtest ซ้ำ: `python research\backtest_history.py 2015 2026 --preset live` (รายปี),
 > `python research\monthly_report.py` (รายเดือน), `python research\strategy_lab.py` (59 แบบ, ~5 นาที),
 > `python research\sizing_sim.py` (ขนาด position / Monte Carlo). ทั้งหมดใช้ `backtest\XAU_15m_data.csv`
