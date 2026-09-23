@@ -40,3 +40,69 @@ MT5 บน VPS จะรันต่อเอง ถ้า VPS รีบูต M
 ## ผลที่คาดหวัง (จาก backtest 22 ปี, risk 1% + throttle)
 
 เฉลี่ย ~+2%/เดือน, CAGR ~22%, drawdown สูงสุดในอดีต 38% — **มีปีขาดทุน** (−9 ถึง −36%) และช่วงขาดทุนติดกัน 6–9 เดือน ช่วง มิ.ย. 2024→ก.ย. 2026 (ขาขึ้นแรง) ได้ดีกว่านี้มาก ห้ามใช้ช่วงนั้นเป็นความคาดหวัง
+
+---
+
+# HourlySet EA — บอท "มีไม้ทุกชั่วโมง" หลายไม้/hedge ได้ (H1)
+
+ไฟล์: `HourlySet.ex5` (คอมไพล์แล้ว 0 errors) และ `HourlySet.mq5` · แนบบนกราฟ **XAUUSD-ECN H1** · ต้องเป็นบัญชี hedging (VT Markets เป็น)
+
+## ผล backtest ก่อนใช้ (research/hourly_backtest.py, 2015–2026, ต้นทุน $0.25/oz, risk 0.25 %/ขา)
+
+| Mode | ไม้/วัน | ชั่วโมงที่มีไม้ | WR | PF 2015–26 | PF 2022–26 |
+|---|---|---|---|---|---|
+| trend BUY-only 1.5 ATR / 1R (**default**) | 10.5 | 46 % | 48 % | **0.92** | **1.01** |
+| trend สองทาง | 18.9 | 83 % | 47 % | 0.89 | 0.95 |
+| straddle (BUY+SELL ทุกชั่วโมง) + ปิดทั้งชุดเมื่อกำไร | 25 | 55 % | 47 % | 0.87 | 0.92 |
+| recovery (เปิด hedge เมื่อติดลบ 0.5 ATR, ปิดชุดที่ +0.2 ATR) | 21 | 61 % | 46 % | 0.87 | 0.93 |
+| breakout / momo / mean-reversion | 4–15 | 15–65 % | 41–48 % | 0.80–0.90 | 0.86–0.95 |
+
+**ทุกโหมดติดลบ** การ hedge ไม่สร้าง edge (BUY+SELL พร้อมกันหักลบกันเหลือแต่ต้นทุน 2 เท่า) ตัว default คือ "แพ้น้อยที่สุด" ใช้ทดสอบ demo ก่อน
+
+## Inputs หลัก
+
+| Input | default | ความหมาย |
+|---|---|---|
+| Mode | trend | trend / momo / breakout / straddle / recovery / mr |
+| Side | BUY | both / buy / sell |
+| SlAtr / RR | 1.5 / 1.0 | SL = 1.5×ATR(14,H1), TP = 1.0×SL |
+| MaxHoldHours | 4 | ปิดไม้เมื่อครบ 4 ชม. (recovery: ปิด lead+hedge พร้อมกัน) |
+| MaxPositions | 4 | ไม้เปิดพร้อมกันสูงสุด |
+| SetTpAtr | 0 | ปิดทั้งชุด (ไม้ที่เปิดชั่วโมงเดียวกัน) เมื่อกำไรสุทธิ = ค่านี้ × ATR (นับขาที่ปิดไปแล้วด้วย) ใช้กับ straddle; 0 = ปิด |
+| LockTwinOnTp | false | straddle: ขาหนึ่งถึง TP → ปิดอีกขาทันที |
+| HedgeAtAtr / BasketTpAtr | 0.5 / 0.2 | recovery: เปิด hedge เมื่อติดลบ 0.5 ATR, ปิดคู่ที่กำไรสุทธิ +0.2 ATR |
+| DailyTargetPct / DailyStopPct | 0 / 0 | เป้า/ลิมิตรายวัน % ของ balance ต้นวัน server → ถึงแล้วปิดหมด หยุดถึงพรุ่งนี้ (0 = ปิด) |
+| RiskPct | 0.25 | เสี่ยงต่อขา % ของ equity (4 ไม้ = 1 %) |
+| DD1/DD2, HardStopPct | 0.20/0.35, 0.60 | throttle และ hard stop เหมือน H4Trend |
+| MagicBase | 737000 | + Mode |
+| SignalDump | false | Strategy Tester: เขียนทุกการตัดสินใจลง Common\Files\hourlyset_signals.csv |
+
+## วิธีทดสอบใน Strategy Tester
+
+1. View → Strategy Tester (Ctrl+R) → Expert `HourlySet`, Symbol `XAUUSD-ECN`, Period **H1**, Model *Every tick based on real ticks*
+2. Inputs: ค่า default หรือเปลี่ยน Mode; ใส่ DailyTargetPct/DailyStopPct ถ้าต้องการ
+3. ดูแท็บ Journal ว่ามี `HourlySet init:` และไม่มี error; Results → Report เทียบกับ `reports/hourly_sweep_*.txt`
+4. ถ้าจะเทียบสัญญาณตัวต่อตัวกับ Python ตั้ง SignalDump=true แล้วเทียบ CSV กับ `reports/hourly_trades.csv`
+
+## สิ่งที่ EA ทำ / ไม่ทำ
+
+- ตัดสินใจ**เฉพาะตอนแท่ง H1 ปิด**; ระหว่างแท่งจัดการ max hold / set TP / hedge / เป้ารายวัน ทุก tick
+- ไม่ปิดไม้ตอนจบวันเอง (ตามที่ขอ) — ไม้ปิดด้วย SL/TP/ครบ 4 ชม./ชุดกำไร/เป้ารายวัน
+- ต่อสัญญาณช้ากว่า 20 นาทีหลังแท่งปิด (แนบ EA กลางแท่ง) จะข้ามชั่วโมงนั้น
+- หยุดถาวรเมื่อ hard stop → ลบ Global Variable `HS_XAUUSD-ECN_737000_halted`
+
+## การแจ้งเตือน Discord (HourlySet)
+
+Webhook ใส่เป็นค่า default ใน input `DiscordWebhook` แล้ว (เปลี่ยนได้) — **ต้องเปิด WebRequest ก่อน**: Tools → Options → Expert Advisors → ติ๊ก *Allow WebRequest for listed URL* → เพิ่ม `https://discord.com` มิฉะนั้น Journal จะขึ้น `Discord: WebRequest failed (4014)` และไม่มีข้อความออก (ใน Strategy Tester ไม่ส่งอยู่แล้ว)
+
+| เหตุการณ์ | หัวข้อ | เนื้อหา |
+|---|---|---|
+| EA เริ่ม | `EA เริ่มทำงาน` | สัญลักษณ์, โหมด, balance, risk/ขา, ถือสูงสุด, เวลาสรุปรายวัน |
+| เปิดไม้ | `เปิดไม้ BUY XAUUSD-ECN 0.10 lot` (เขียว/ส้ม) | โหมด, ราคาเข้า, SL + $ ที่เสี่ยง, TP, ถือได้สูงสุด, ชุด, จำนวนไม้ที่เปิดอยู่ |
+| ปิดไม้ | `ปิดไม้ #ticket กำไร +12.30` / `ขาดทุน -8.10` (เขียว/แดง) | ทิศ, lot, เข้า→ออก, เหตุผล (SL / TP / EA ปิดเอง / มือ), เวลาที่ถือ, กำไรสุทธิของชุด, ไม้ที่ยังค้าง, balance |
+| เปิดขา hedge (โหมด recovery) | `เปิดขา HEDGE` (เหลือง) | ไม้หลักติดลบเท่าไร, ขาตรงข้ามกี่ lot, เงื่อนไขปิดคู่ |
+| ถึงเป้า / ชนลิมิตรายวัน | `ถึงเป้ารายวันแล้ว` / `ชนลิมิตขาดทุนรายวัน` | % ของวัน, ปิดทุกไม้ หยุดถึงพรุ่งนี้ |
+| **สรุปรายวัน** (input `SummaryHour`, default 00:00 server) | `สรุปรายวัน 2026.09.23  +45.20` | ช่วงเวลา 24 ชม., เปิดกี่ไม้ / ปิดกี่ไม้, ชนะ/แพ้ + win rate, กำไรสุทธิ (ดีสุด/แย่สุด), **ไม้ที่ยังค้าง** รายตัว (ทิศ, lot, ราคา, ลอยตัว, ถือมานานเท่าไร), balance/equity |
+| Hard stop | `HARD STOP - EA หยุดทำงาน` | equity ต่ำกว่าเส้น, วิธีเริ่มใหม่ |
+
+สรุปรายวันจะเริ่มส่งตั้งแต่วันที่สองหลังแนบ EA (วันแรกไม่มีข้อมูลครบ 24 ชม.)

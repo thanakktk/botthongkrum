@@ -1,0 +1,11 @@
+Intraday bot — XAUUSD M15 2015-01-02 -> 2026-01-30 (258220 bars, 11.1 yr), cost $0.25/oz, risk 0.50%/trade, daily target 1.0% / stop 1.0%, flat at day end, 200-bar window (= live)
+
+mom_n8_rr1.5 tgt0.0% stop0.0%      n=14787 ( 5.2/day) WR= 39.6% W/L=1.12 PF=0.74 avgR=-0.153 CAGR= -64.6% DD=100.0% | days: target  0.0% stop  0.0% positive 36.1% of active
+mom_n8_rr1.5 tgt0.5% stop1.0%      n= 8390 ( 3.0/day) WR= 38.4% W/L=1.13 PF=0.71 avgR=-0.165 CAGR= -46.9% DD= 99.9% | days: target 45.6% stop 38.2% positive 48.6% of active
+mom_n8_rr1.5 tgt1.0% stop1.0%      n=11078 ( 3.9/day) WR= 38.4% W/L=1.16 PF=0.73 avgR=-0.155 CAGR= -54.5% DD=100.0% | days: target 22.2% stop 42.2% positive 36.3% of active
+mom_n8_rr1.5 tgt1.0% stop2.0%      n=13075 ( 4.6/day) WR= 39.7% W/L=1.11 PF=0.73 avgR=-0.153 CAGR= -60.1% DD=100.0% | days: target 22.4% stop  8.6% positive 38.3% of active
+mom_n8_rr1.5 tgt2.0% stop2.0%      n=14351 ( 5.1/day) WR= 39.3% W/L=1.13 PF=0.73 avgR=-0.155 CAGR= -63.9% DD=100.0% | days: target  4.6% stop  8.6% positive 36.1% of active
+mom_n8_rr1.5 tgt0.5% stop0.5%      n= 3859 ( 1.4/day) WR= 38.6% W/L=1.04 PF=0.65 avgR=-0.202 CAGR= -30.0% DD= 98.4% | days: target 34.0% stop 64.8% positive 34.4% of active
+mom_n8_rr1.5 tgt1.5% stop1.5%      n=13483 ( 4.8/day) WR= 39.0% W/L=1.14 PF=0.73 avgR=-0.157 CAGR= -62.2% DD=100.0% | days: target  9.8% stop 21.6% positive 36.1% of active
+
+done in 24s

@@ -1,0 +1,27 @@
+Hourly multi-position bot — XAUUSD 2022-01-03 -> 2026-01-30 (23454 H1 bars, 4.1 yr), cost $0.25/oz, risk 0.25%/position, daily target 0.0% / stop 0.0% (0 = off), no EOD flat
+
+trend_sl1_rr1.5_h4             n= 19343 (18.9/day) hours-with-entry= 83.3% avg-open=1.60 WR= 44.3% W/L=1.19 PF=0.95 avgR=-0.024 CAGR= -27.7% DD= 82.2%
+trend_sl1.5_rr1_h4             n= 19343 (18.9/day) hours-with-entry= 83.3% avg-open=1.88 WR= 48.9% W/L=1.00 PF=0.95 avgR=-0.016 CAGR= -19.1% DD= 69.0%
+trend_sl2_rr1_h4               n= 19343 (18.9/day) hours-with-entry= 83.3% avg-open=2.15 WR= 49.1% W/L=1.00 PF=0.96 avgR=-0.010 CAGR= -13.0% DD= 56.2%
+trend_sl1_rr2_h4               n= 19343 (18.9/day) hours-with-entry= 83.3% avg-open=1.71 WR= 42.8% W/L=1.28 PF=0.96 avgR=-0.020 CAGR= -24.9% DD= 80.3%
+trend_sl1.5_rr1_h8             n= 19344 (18.9/day) hours-with-entry= 83.3% avg-open=3.34 WR= 49.1% W/L=1.01 PF=0.98 avgR=-0.010 CAGR= -16.0% DD= 72.1%
+trend_sl1.5_rr1_h4_buy         n= 11409 (11.1/day) hours-with-entry= 49.1% avg-open=1.10 WR= 50.4% W/L=0.99 PF=1.01 avgR=+0.002 CAGR=  +0.2% DD= 43.7%
+momo0.5_sl1_rr1.5_h4           n= 15133 (14.8/day) hours-with-entry= 65.2% avg-open=1.20 WR= 43.3% W/L=1.22 PF=0.93 avgR=-0.031 CAGR= -27.1% DD= 79.1%
+momo1.0_sl1.5_rr1_h4           n=  9086 ( 8.9/day) hours-with-entry= 39.2% avg-open=0.83 WR= 48.1% W/L=1.03 PF=0.95 avgR=-0.017 CAGR=  -9.7% DD= 49.0%
+breakout4_sl1_rr1.5_h4         n=  6010 ( 5.9/day) hours-with-entry= 25.9% avg-open=0.45 WR= 42.7% W/L=1.22 PF=0.91 avgR=-0.043 CAGR= -15.2% DD= 55.0%
+breakout4_sl1.5_rr1_h4         n=  6010 ( 5.9/day) hours-with-entry= 25.9% avg-open=0.55 WR= 47.6% W/L=1.01 PF=0.91 avgR=-0.030 CAGR= -10.9% DD= 44.9%
+straddle_sl1_rr1_h4            n= 31972 (31.2/day) hours-with-entry= 73.1% avg-open=2.10 WR= 47.4% W/L=0.99 PF=0.89 avgR=-0.049 CAGR= -61.9% DD= 98.0%
+straddle_sl1_rr1_h4_lock       n= 31972 (31.2/day) hours-with-entry= 73.1% avg-open=2.10 WR= 47.4% W/L=0.99 PF=0.89 avgR=-0.049 CAGR= -61.9% DD= 98.0%
+straddle_sl2_rr0.5_h4          n= 28825 (28.1/day) hours-with-entry= 79.5% avg-open=2.52 WR= 54.6% W/L=0.75 PF=0.90 avgR=-0.023 CAGR= -34.3% DD= 82.2%
+straddle_sl1_rr2_h4_lock       n= 29411 (28.7/day) hours-with-entry= 81.8% avg-open=2.49 WR= 42.2% W/L=1.29 PF=0.94 avgR=-0.029 CAGR= -42.4% DD= 91.4%
+straddle_sl2_rr3_set0.3        n= 25488 (24.9/day) hours-with-entry= 55.3% avg-open=2.76 WR= 48.2% W/L=0.99 PF=0.92 avgR=-0.022 CAGR= -29.3% DD= 75.9%
+straddle_sl2_rr3_set0.5        n= 25480 (24.9/day) hours-with-entry= 55.5% avg-open=2.77 WR= 48.2% W/L=0.99 PF=0.92 avgR=-0.022 CAGR= -29.2% DD= 75.8%
+straddle_sl1_rr3_set0.3        n= 32336 (31.5/day) hours-with-entry= 70.8% avg-open=2.06 WR= 47.6% W/L=0.98 PF=0.89 avgR=-0.048 CAGR= -61.3% DD= 98.0%
+straddle_sl3_rr2_set0.5_h8     n= 25369 (24.8/day) hours-with-entry= 54.7% avg-open=6.54 WR= 48.8% W/L=1.00 PF=0.95 avgR=-0.013 CAGR= -18.9% DD= 58.4%
+recovery_sl1.5_rr1_h4          n= 21336 (20.8/day) hours-with-entry= 62.0% avg-open=2.40 WR= 47.9% W/L=1.01 PF=0.93 avgR=-0.021 CAGR= -24.7% DD= 72.7%
+recovery_sl2_rr1_h4            n= 21079 (20.6/day) hours-with-entry= 59.9% avg-open=2.57 WR= 48.1% W/L=1.01 PF=0.93 avgR=-0.018 CAGR= -21.0% DD= 66.6%
+mr1.5_sl1.5_h4                 n=  7839 ( 7.6/day) hours-with-entry= 33.8% avg-open=0.81 WR= 46.7% W/L=0.98 PF=0.86 avgR=-0.048 CAGR= -21.4% DD= 63.6%
+mr2.0_sl2_h4                   n=  4210 ( 4.1/day) hours-with-entry= 18.1% avg-open=0.47 WR= 47.0% W/L=0.97 PF=0.86 avgR=-0.038 CAGR=  -9.7% DD= 35.1%
+mr1.5_sl1.5_h4_buy             n=  3484 ( 3.4/day) hours-with-entry= 15.0% avg-open=0.36 WR= 48.6% W/L=0.96 PF=0.91 avgR=-0.031 CAGR=  -6.7% DD= 34.8%
+
+done in 37s

@@ -1,0 +1,22 @@
+Intraday bot — XAUUSD M15 2022-01-03 -> 2026-01-30 (93728 bars, 4.1 yr), cost $0.25/oz, risk 0.50%/trade, daily target 1.0% / stop 1.0%, flat at day end, 200-bar window (= live)
+
+mom_n8_rr1.5 (base)                n= 4010 ( 3.9/day) WR= 39.6% W/L=1.27 PF=0.83 avgR=-0.094 CAGR= -37.8% DD= 87.8% | days: target 27.9% stop 38.5% positive 41.3% of active
+mom_n4_rr1.5 (hourly pace)         n= 4499 ( 4.4/day) WR= 39.2% W/L=1.26 PF=0.81 avgR=-0.103 CAGR= -44.1% DD= 91.7% | days: target 29.7% stop 45.8% positive 40.0% of active
+mom_n12_rr2                        n= 3369 ( 3.3/day) WR= 35.0% W/L=1.61 PF=0.87 avgR=-0.079 CAGR= -28.9% DD= 81.4% | days: target 29.8% stop 36.3% positive 41.3% of active
+mom_n8_rr1.0                       n= 4661 ( 4.6/day) WR= 47.7% W/L=0.82 PF=0.75 avgR=-0.125 CAGR= -51.7% DD= 95.2% | days: target 18.2% stop 40.1% positive 37.0% of active
+mom_n8_rr2.5                       n= 3062 ( 3.0/day) WR= 30.7% W/L=1.95 PF=0.86 avgR=-0.085 CAGR= -28.5% DD= 80.3% | days: target 38.0% stop 43.1% positive 45.8% of active
+mom_n8_sl1.5_rr1.5                 n= 3666 ( 3.6/day) WR= 40.7% W/L=1.28 PF=0.88 avgR=-0.063 CAGR= -25.4% DD= 73.6% | days: target 27.1% stop 32.8% positive 43.8% of active
+mom_n8_sl0.7_rr2                   n= 3858 ( 3.8/day) WR= 33.8% W/L=1.54 PF=0.78 avgR=-0.136 CAGR= -48.4% DD= 94.1% | days: target 31.5% stop 47.2% positive 38.7% of active
+mom_n8_rr1.5_buy                   n= 2465 ( 2.4/day) WR= 41.3% W/L=1.22 PF=0.86 avgR=-0.076 CAGR= -21.2% DD= 69.4% | days: target 19.0% stop 15.5% positive 42.5% of active
+mom_n8_rr1.5_lon+ny(8-21h)         n= 3024 ( 3.0/day) WR= 41.0% W/L=1.25 PF=0.87 avgR=-0.071 CAGR= -24.0% DD= 68.4% | days: target 20.9% stop 22.4% positive 46.6% of active
+mom_n8_rr1.5_ema50/200             n=    0 ( 0.0/day) WR=  0.0% W/L=0.00 PF=0.00 avgR=+0.000 CAGR=  +0.0% DD=  0.0% | days: target  0.0% stop  0.0% positive  0.0% of active
+mom_n8_rr1.5_hold32                n= 3996 ( 3.9/day) WR= 39.4% W/L=1.28 PF=0.83 avgR=-0.094 CAGR= -37.6% DD= 87.5% | days: target 28.0% stop 38.7% positive 41.6% of active
+mom_n8_rr1.5_minatr0.05%           n= 3922 ( 3.8/day) WR= 39.4% W/L=1.28 PF=0.83 avgR=-0.092 CAGR= -36.7% DD= 86.7% | days: target 27.9% stop 37.9% positive 41.7% of active
+pull_rr1.2 (base)                  n= 3766 ( 3.7/day) WR= 44.0% W/L=0.99 PF=0.78 avgR=-0.115 CAGR= -41.8% DD= 89.8% | days: target 21.0% stop 34.7% positive 38.9% of active
+pull_rr1.0                         n= 4122 ( 4.0/day) WR= 47.9% W/L=0.82 PF=0.75 avgR=-0.120 CAGR= -46.1% DD= 92.4% | days: target 15.4% stop 32.1% positive 36.2% of active
+pull_rr2.0                         n= 3260 ( 3.2/day) WR= 33.8% W/L=1.55 PF=0.79 avgR=-0.124 CAGR= -39.8% DD= 87.8% | days: target 26.8% stop 38.2% positive 41.1% of active
+pull_rr1.2_buy                     n= 2282 ( 2.2/day) WR= 44.3% W/L=0.99 PF=0.79 avgR=-0.111 CAGR= -27.1% DD= 74.7% | days: target 13.1% stop 13.9% positive 39.2% of active
+pull_rr1.2_lon+ny(8-21h)           n= 2723 ( 2.7/day) WR= 45.7% W/L=1.02 PF=0.86 avgR=-0.070 CAGR= -21.6% DD= 65.5% | days: target 16.7% stop 17.2% positive 46.0% of active
+pull_sl1.5_rr1.2                   n= 3411 ( 3.3/day) WR= 43.5% W/L=1.07 PF=0.83 avgR=-0.084 CAGR= -30.2% DD= 77.7% | days: target 19.0% stop 26.4% positive 44.9% of active
+
+done in 28s

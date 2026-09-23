@@ -1,0 +1,15 @@
+Intraday bot — XAUUSD M15 2015-01-02 -> 2026-01-30 (258220 bars, 11.1 yr), cost $0.25/oz, risk 0.50%/trade, daily target 1.0% / stop 1.0%, flat at day end, 200-bar window (= live)
+
+orb_lon9+ny16_r4_w12_rr1.5         n= 4768 ( 1.7/day) WR= 44.0% W/L=1.16 PF=0.91 avgR=-0.043 CAGR=  -9.4% DD= 67.5% | days: target  9.4% stop  0.0% positive 48.1% of active
+orb_lon9+ny16_rr1.0                n= 4777 ( 1.7/day) WR= 49.9% W/L=0.90 PF=0.89 avgR=-0.045 CAGR=  -9.6% DD= 68.1% | days: target  0.0% stop  0.0% positive 39.9% of active
+orb_lon9+ny16_rr2.0                n= 4748 ( 1.7/day) WR= 42.4% W/L=1.20 PF=0.89 avgR=-0.056 CAGR= -11.9% DD= 76.3% | days: target 12.7% stop  0.0% positive 40.8% of active
+orb_lon9+ny16_r2_w8                n= 5199 ( 1.8/day) WR= 44.1% W/L=1.18 PF=0.93 avgR=-0.035 CAGR=  -8.5% DD= 74.7% | days: target 13.1% stop  0.0% positive 54.9% of active
+orb_lon9+ny16_r8_w16               n= 4045 ( 1.4/day) WR= 42.7% W/L=1.19 PF=0.89 avgR=-0.052 CAGR=  -9.5% DD= 67.9% | days: target  4.8% stop  0.0% positive 44.8% of active
+orb_lon9_only                      n= 2536 ( 0.9/day) WR= 41.5% W/L=1.25 PF=0.89 avgR=-0.066 CAGR=  -7.6% DD= 60.2% | days: target  0.0% stop  0.0% positive 41.5% of active
+orb_ny16_only                      n= 2252 ( 0.8/day) WR= 46.2% W/L=1.12 PF=0.97 avgR=-0.012 CAGR=  -1.4% DD= 27.3% | days: target  0.0% stop  0.0% positive 46.2% of active
+orb_asia1+lon9+ny16                n= 7146 ( 2.5/day) WR= 40.4% W/L=1.25 PF=0.85 avgR=-0.074 CAGR= -21.9% DD= 93.9% | days: target 16.5% stop 19.3% positive 46.8% of active
+orb_lon9+ny16_buy                  n= 2426 ( 0.9/day) WR= 44.9% W/L=1.14 PF=0.93 avgR=-0.031 CAGR=  -3.6% DD= 42.4% | days: target  2.7% stop  0.0% positive 46.2% of active
+orb_lon9+ny16_nogoal               n= 4768 ( 1.7/day) WR= 43.7% W/L=1.18 PF=0.91 avgR=-0.041 CAGR=  -8.9% DD= 65.7% | days: target  0.0% stop  0.0% positive 48.1% of active
+orb_lon9+ny16_sl1atr               n= 4788 ( 1.7/day) WR= 41.5% W/L=1.15 PF=0.82 avgR=-0.103 CAGR= -20.5% DD= 92.3% | days: target 11.7% stop  0.0% positive 51.6% of active
+
+done in 11s

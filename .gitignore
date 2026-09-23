@@ -22,3 +22,9 @@ __pycache__/
 # folders are ~400 MB and never read by any script.
 backtest/XAUUSD (*)/
 reports/*_run.log
+
+# RDP connection files (VPS)
+*.rdp
+
+# local EA presets (contain the Discord webhook)
+mql5/*_local.set

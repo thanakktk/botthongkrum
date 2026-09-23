@@ -61,7 +61,8 @@ class TradingLoop:
                  executor: ExecutionEngine | None = None,
                  strategies=None, arbitrator=None, symbols=None,
                  shadow=None, heartbeat_every: int = 10,
-                 manage_owner: str | None = None, own_exposure: bool = False):
+                 manage_owner: str | None = None, own_exposure: bool = False,
+                 daily_target_pct: float = 0.0, daily_stop_pct: float = 0.0):
         self.broker = broker
         self.own_exposure = own_exposure  # exposure cap scoped to manage_owner
         self.store = store
@@ -88,6 +89,13 @@ class TradingLoop:
         self.spike_mult = 2.5                 # bar range > this × ATR = anomaly
         self._anomaly_alert_tick: dict = {}   # symbol -> tick (alert cooldown)
         self._last_arb_reason: dict = {}      # symbol -> last arb reason (audit dedupe)
+        # Day-trading goal: once today's P/L (equity vs the CET-midnight balance)
+        # reaches +target the loop locks it (flattens) and opens nothing more
+        # today; at -stop likewise. 0 = off. Mirrors research/intraday_backtest.py.
+        self.daily_target_pct = daily_target_pct
+        self.daily_stop_pct = daily_stop_pct
+        self._daily_goal_state: str | None = None   # None | "target" | "stop"
+        self._daily_goal_date = None
 
     # ----- startup --------------------------------------------------------- #
     def startup(self, now: datetime):
@@ -162,7 +170,8 @@ class TradingLoop:
         if flat_reason is not None:
             self._apply_time_flatten(flat_reason)
         elif (self.strategies and self.arbitrator
-              and verdict.action == Action.NORMAL):
+              and verdict.action == Action.NORMAL
+              and self._daily_goal(snap, now) is None):
             self._trade_cycle(snap, now)
 
         # Shadow Monitor: paper-trade the benched 9 (sim only; never touches money).
@@ -170,6 +179,47 @@ class TradingLoop:
         if self.shadow is not None:
             self.shadow.tick(self.broker, now)
         return verdict
+
+    def _daily_goal(self, snap: AccountSnapshot, now: datetime) -> str | None:
+        """Return "target"/"stop" once today's P/L crossed the configured goal
+        (sticky until the CET day rolls over), else None. Flattens on the
+        first crossing so the result is locked in."""
+        if not (self.daily_target_pct or self.daily_stop_pct):
+            return None
+        d = self.engine.cet_date(now)
+        if self._daily_goal_date != d:
+            self._daily_goal_date, self._daily_goal_state = d, None
+        if self._daily_goal_state is not None:
+            return self._daily_goal_state
+        base = self.engine.midnight_balance or snap.balance
+        if base <= 0:
+            return None
+        pl = snap.equity / base - 1.0
+        state = None
+        if self.daily_target_pct and pl >= self.daily_target_pct:
+            state = "target"
+        elif self.daily_stop_pct and pl <= -self.daily_stop_pct:
+            state = "stop"
+        if state is None:
+            return None
+        self._daily_goal_state = state
+        msg = (f"daily {state} reached: P/L {pl:+.2%} vs midnight {base:,.2f} "
+               f"-> no new trades until the next CET day")
+        print(f"  ** {msg}")
+        self.store.write_audit("daily_goal", state, "locked",
+                               {"pl_pct": round(pl * 100, 3), "midnight_balance": base,
+                                "equity": snap.equity, "cet_date": str(d)})
+        if list(self.broker.open_positions()):
+            try:
+                closed = self.executor.flatten_all(reason=f"daily_{state}")
+                print(f"     locked in: flattened {closed}")
+            except Exception as e:
+                print(f"     [ERROR] daily-goal flatten failed: {e}")
+        try:
+            self.notifier.send(f"[{state.upper()}] {msg}")
+        except Exception:
+            pass
+        return state
 
     def _apply_time_flatten(self, reason: Reason) -> None:
         if list(self.broker.open_positions()):
@@ -461,6 +511,17 @@ def main() -> int:
                     help="bank the partial + go break-even at this R. 11-yr study: "
                          "later is better on gold (tp1@2.0 > 1.5 > 1.0); 'give the "
                          "trend room'. Default 2.0.")
+    ap.add_argument("--tp2-r", type=float, default=2.5,
+                    help="the broker TP (runner target) in R. Default 2.5. Set "
+                         "--tp1-r equal to it for a plain full exit at that R "
+                         "(quantum_qpl backtests use 2.0/2.0).")
+    ap.add_argument("--daily-target-pct", type=float, default=0.0,
+                    help="day-trading goal: once equity is this fraction above the "
+                         "CET-midnight balance, flatten and stop for the day "
+                         "(0.01 = +1%%; 0 = off)")
+    ap.add_argument("--daily-stop-pct", type=float, default=0.0,
+                    help="day-trading stop: once equity is this fraction below the "
+                         "CET-midnight balance, flatten and stop for the day (0 = off)")
     ap.add_argument("--dd-throttle", action="store_true",
                     help="drawdown throttle (OOS-validated 'S3'): cut risk to 1/2 "
                          "at >=3%% below the run's equity peak, 1/4 at >=6%%. Same "
@@ -534,7 +595,7 @@ def main() -> int:
             arbitrator = Arbitrator(ArbitrationConfig(
                 risk_pct=args.risk_pct, min_agreement=args.min_agreement,
                 timeframes=tfs, tf_weights=tf_weights, allowed_sessions=sess,
-                require_regime=req_regime, tp1_r=args.tp1_r,
+                require_regime=req_regime, tp1_r=args.tp1_r, tp2_r=args.tp2_r,
                 min_agree=args.min_agree, min_families=args.min_families,
                 min_conviction=args.min_conviction, dd_throttle_levels=dd_levels,
                 signal_floor=args.signal_floor,
@@ -568,7 +629,8 @@ def main() -> int:
                   f"min_agreement={args.min_agreement:.0%} TFs={tfs} "
                   f"roster={[s.id for s in strategies]} "
                   f"gates(agree>={args.min_agree},fam>={args.min_families}) "
-                  f"regime={req_regime or 'any'} tp1={args.tp1_r}R "
+                  f"regime={req_regime or 'any'} tp1={args.tp1_r}R tp2={args.tp2_r}R "
+                  f"daily-goal={args.daily_target_pct:+.1%}/{-args.daily_stop_pct:.1%} "
                   f"be_trigger={args.be_trigger}R "
                   f"(Algo {'ON' if broker else '?'}; "
                   f"Discord {'ON' if notifier.enabled else 'OFF'}).")
@@ -577,7 +639,9 @@ def main() -> int:
                     strategies=strategies, arbitrator=arbitrator,
                     symbols=symbols, shadow=shadow,
                     manage_owner=(args.ensemble_tag if args.trade else None),
-                    own_exposure=(args.exposure == "own")).run(
+                    own_exposure=(args.exposure == "own"),
+                    daily_target_pct=args.daily_target_pct,
+                    daily_stop_pct=args.daily_stop_pct).run(
                         ticks=args.ticks, interval=args.interval)
     return 0
 

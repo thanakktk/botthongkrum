@@ -1,0 +1,66 @@
+Intraday bot — XAUUSD M15 2022-01-03 -> 2026-01-30 (93728 bars, 4.1 yr), cost $0.25/oz, risk 0.50%/trade, daily target 1.0% / stop 1.0%, flat at day end, 200-bar window (= live)
+
+intraday_momentum (default)        n= 4010 ( 3.9/day) WR= 39.6% W/L=1.27 PF=0.83 avgR=-0.094 CAGR= -37.8% DD= 87.8% | days: target 27.9% stop 38.5% positive 41.3% of active
+intraday_pullback (default)        n= 3766 ( 3.7/day) WR= 44.0% W/L=0.99 PF=0.78 avgR=-0.115 CAGR= -41.8% DD= 89.8% | days: target 21.0% stop 34.7% positive 38.9% of active
+
+====================================================================================================
+DETAIL: intraday_momentum (default)  2022-01-03 -> 2026-01-30  risk 0.50%/trade
+====================================================================================================
+trades 4010  win-rate 39.6%  W/L 1.27  PF 0.83  expectancy -0.094R  max consecutive losses 16  avg hold 49 min
+total -85.5%  CAGR -37.8%  max DD 87.8%
+exits: sl 2099 (52%), tp 1407 (35%), lock_stop 261 (7%), lock_target 96 (2%), eod 86 (2%), time 61 (2%)
+  BUY  n= 2230 WR= 40.3% PF=0.85 avgR=-0.082
+  SELL n= 1780 WR= 38.8% PF=0.81 avgR=-0.108
+
+--- DAILY --- 1023 trading days, 1023 with trades (3.9 trades/day avg, max 9/day)
+days target hit 285 (27.9%)   days stopped out 394 (38.5%)   positive days 41.3% of active   avg day -0.183%  best +1.65%  worst -1.49%
+max consecutive losing days 12
+entries per hour of day (server time) and WR:
+  00h n=  12 WR=  17% avgR=-0.61
+  01h n= 201 WR=  40% avgR=-0.10
+  02h n= 221 WR=  37% avgR=-0.20
+  03h n= 288 WR=  38% avgR=-0.18
+  04h n= 305 WR=  43% avgR=-0.06
+  05h n= 210 WR=  44% avgR=-0.03
+  06h n= 170 WR=  41% avgR=-0.09
+  07h n= 198 WR=  41% avgR=-0.06
+  08h n= 232 WR=  41% avgR=-0.08
+  09h n= 269 WR=  41% avgR=-0.07
+  10h n= 231 WR=  44% avgR=+0.01
+  11h n= 178 WR=  35% avgR=-0.13
+  12h n= 139 WR=  35% avgR=-0.13
+  13h n= 172 WR=  38% avgR=-0.08
+  14h n= 160 WR=  38% avgR=-0.12
+  15h n= 242 WR=  39% avgR=-0.11
+  16h n= 176 WR=  43% avgR=+0.04
+  17h n= 178 WR=  39% avgR=-0.04
+  18h n= 100 WR=  38% avgR=-0.16
+  19h n=  85 WR=  35% avgR=-0.10
+  20h n=  64 WR=  34% avgR=-0.13
+  21h n=  72 WR=  39% avgR=-0.10
+  22h n=  60 WR=  35% avgR=-0.18
+  23h n=  47 WR=  36% avgR=-0.22
+by weekday:
+  Mon n=  768 WR= 42.3% PF=0.94 avgR=-0.033
+  Tue n=  805 WR= 39.4% PF=0.81 avgR=-0.104
+  Wed n=  834 WR= 38.2% PF=0.77 avgR=-0.130
+  Thu n=  815 WR= 39.8% PF=0.85 avgR=-0.084
+  Fri n=  788 WR= 38.6% PF=0.80 avgR=-0.115
+
+--- YEARLY ---
+year   trades  /day    WR%   W/L    PF    avgR  return%  maxDD%  tgt% stop%
+2022     1017   4.0   37.2  1.24  0.73  -0.153    -54.7    57.2    23    44
+2023      989   3.8   39.5  1.18  0.77  -0.127    -47.2    50.3    25    37
+2024     1043   4.0   38.9  1.29  0.82  -0.101    -41.7    43.3    27    39
+2025      902   3.8   42.7  1.35  1.01  +0.003     -0.0    20.0    36    34
+2026       59   3.9   49.2  1.33  1.28  +0.138     +4.1     2.6    47    27
+
+--- MONTHLY --- 12/49 months positive (24%), avg -3.74%, best +9.2%, worst -12.5%
+year      Jan    Feb    Mar    Apr    May    Jun    Jul    Aug    Sep    Oct    Nov    Dec    YEAR
+2022     -6.2   -7.5   +0.8   -9.7   +1.4  -10.4   -7.8  -10.7  -10.6  -10.3   -6.7   +2.4   -54.7
+2023     -3.9   -4.2  -10.2   -2.1   -5.2   -4.0  -12.5   -9.3   -3.5   -3.1   -3.2   -0.3   -47.2
+2024    -10.2   -4.7   -8.2   -5.3   +3.9   -1.1   -8.4   +0.9   -8.4   -7.8   -1.1   -1.3   -41.7
+2025     -1.9   +9.2   -2.3   +3.2   -2.9   -3.2   -8.9   -3.1   +5.4   +1.2   +0.7   +3.8    -0.0
+2026     +4.1                                                                                 +4.1
+
+done in 9s
