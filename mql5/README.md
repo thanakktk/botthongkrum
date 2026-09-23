@@ -106,3 +106,15 @@ Webhook ใส่เป็นค่า default ใน input `DiscordWebhook` แ
 | Hard stop | `HARD STOP - EA หยุดทำงาน` | equity ต่ำกว่าเส้น, วิธีเริ่มใหม่ |
 
 สรุปรายวันจะเริ่มส่งตั้งแต่วันที่สองหลังแนบ EA (วันแรกไม่มีข้อมูลครบ 24 ชม.)
+
+---
+
+# MTF EA — D1/H4/H1 บอกทิศ, เข้าที่ M15 (ย่อตัว)
+
+ไฟล์: `MTF.ex5` / `MTF.mq5` · แนบบนกราฟ **XAUUSD-ECN M15** · คู่มือเต็มและผลทดสอบ: `docs/mtf_bot.md`
+
+- ทิศ: D1, H4, H1 ต้องขึ้นพร้อมกัน (EMA20 > EMA50 และ close > EMA50) → หา BUY; ลงพร้อมกัน → SELL
+- เข้า: ใน 24 แท่ง M15 ราคาแตะ EMA20 แล้วแท่งล่าสุดปิดกลับเหนือ EMA20 และเหนือ high แท่งก่อน; SL ใต้ swing (0.5–2 ATR); TP 2R; ปิดเมื่อครบ 24 ชม.; 1 ไม้ต่อรอบย่อตัว
+- backtest 2015–2026 M15 (ต้นทุนยุคปัจจุบัน): 2,622 ไม้ (0.9/วัน), WR 36 %, W/L 1.94, **PF 1.09**, IS 1.02 / OOS 1.17, +6.6 %/ปี ที่ risk 0.5 %, max DD 15 %; 2024–26 PF 1.2–1.4 · M5 แย่กว่าทุกแบบ (ไม่แนะนำ)
+- Discord เหมือน HourlySet (เปิด/ปิด/สรุปรายวัน/เป้ารายวัน/hard stop) ใส่ webhook ใน input `DiscordWebhook` หรือ Load `MTF_local.set`
+- Inputs หลัก: `NeedVotes` 3, `K` 24, `RR` 2.0, `MaxHoldHours` 24, `ExitOnH1Flip` false, `Side` both, `RiskPct` 0.5, `MagicNumber` 747001

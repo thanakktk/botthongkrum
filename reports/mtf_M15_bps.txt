@@ -1,0 +1,65 @@
+MTF bot — bias D1/H4/H1 (EMA20/50), entries on M15 — XAUUSD 2015-01-02 -> 2026-01-30 (258220 M15 bars, 11.1 yr), cost 0.625 bps of price, risk 0.50%/trade, IS < 2021 <= OOS
+
+pullback need3 swing rr2 hold24  n= 3019 (1.04/day) WR= 35.3% W/L=1.94 PF=1.06 avgR=+0.040 CAGR=  +4.8% DD= 35.2% | IS n=1605 PF=1.00 avgR=+0.002 DD=25.7% | OOS n=1414 PF=1.13 avgR=+0.082 DD=20.6%
+pullback need2 swing rr2 hold24  n= 4717 (1.63/day) WR= 34.4% W/L=1.94 PF=1.01 avgR=+0.010 CAGR=  +1.0% DD= 51.7% | IS n=2614 PF=1.02 avgR=+0.012 DD=23.8% | OOS n=2103 PF=1.01 avgR=+0.007 DD=45.6%
+pullback need0 (no HTF, baseline) n= 8556 (2.96/day) WR= 33.6% W/L=1.91 PF=0.97 avgR=-0.021 CAGR=  -9.4% DD= 81.2% | IS n=4649 PF=0.97 avgR=-0.023 DD=59.5% | OOS n=3907 PF=0.97 avgR=-0.018 DD=59.3%
+pullback H4+D1 need2             n= 3926 (1.36/day) WR= 35.0% W/L=1.93 PF=1.04 avgR=+0.027 CAGR=  +4.0% DD= 35.9% | IS n=2112 PF=1.00 avgR=-0.003 DD=30.5% | OOS n=1814 PF=1.10 avgR=+0.062 DD=13.6%
+pullback H1+H4 need2             n= 4742 (1.64/day) WR= 34.6% W/L=1.95 PF=1.03 avgR=+0.018 CAGR=  +2.9% DD= 46.2% | IS n=2605 PF=1.03 avgR=+0.021 DD=24.7% | OOS n=2137 PF=1.02 avgR=+0.015 DD=34.6%
+pullback need3 rr1.5             n= 3375 (1.17/day) WR= 41.3% W/L=1.49 PF=1.05 avgR=+0.029 CAGR=  +3.9% DD= 34.1% | IS n=1783 PF=0.98 avgR=-0.010 DD=26.9% | OOS n=1592 PF=1.13 avgR=+0.072 DD=20.2%
+pullback need3 rr3               n= 2532 (0.88/day) WR= 28.6% W/L=2.64 PF=1.05 avgR=+0.038 CAGR=  +3.6% DD= 40.9% | IS n=1344 PF=0.97 avgR=-0.018 DD=27.4% | OOS n=1188 PF=1.15 avgR=+0.101 DD=24.9%
+pullback need3 atrSL rr2         n= 4507 (1.56/day) WR= 31.4% W/L=2.00 PF=0.91 avgR=-0.059 CAGR= -12.2% DD= 86.9% | IS n=2412 PF=0.85 avgR=-0.107 DD=76.4% | OOS n=2095 PF=0.99 avgR=-0.004 DD=44.9%
+pullback need3 tp=1xATR_H4       n= 3057 (1.06/day) WR= 34.2% W/L=2.02 PF=1.05 avgR=+0.034 CAGR=  +4.0% DD= 40.9% | IS n=1596 PF=0.99 avgR=-0.004 DD=27.7% | OOS n=1461 PF=1.12 avgR=+0.075 DD=28.1%
+pullback need3 hold8             n= 3825 (1.32/day) WR= 38.1% W/L=1.69 PF=1.04 avgR=+0.025 CAGR=  +3.7% DD= 35.2% | IS n=1994 PF=1.01 avgR=+0.007 DD=21.2% | OOS n=1831 PF=1.08 avgR=+0.046 DD=24.9%
+pullback need3 hold0 (no time exit) n= 2904 (1.00/day) WR= 34.9% W/L=2.00 PF=1.07 avgR=+0.046 CAGR=  +5.6% DD= 27.0% | IS n=1560 PF=1.01 avgR=+0.006 DD=23.3% | OOS n=1344 PF=1.15 avgR=+0.094 DD=16.9%
+pullback need3 exit on H1 flip   n= 2907 (1.01/day) WR= 34.8% W/L=2.00 PF=1.07 avgR=+0.047 CAGR=  +5.6% DD= 26.9% | IS n=1563 PF=1.01 avgR=+0.005 DD=23.3% | OOS n=1344 PF=1.15 avgR=+0.094 DD=16.9%
+pullback need3 buy-only          n= 2001 (0.69/day) WR= 36.2% W/L=1.93 PF=1.10 avgR=+0.062 CAGR=  +5.2% DD= 28.6% | IS n=1003 PF=1.01 avgR=+0.007 DD=18.0% | OOS n= 998 PF=1.19 avgR=+0.116 DD=16.4%
+pullback need3 K6                n= 3241 (1.12/day) WR= 34.9% W/L=1.95 PF=1.05 avgR=+0.030 CAGR=  +3.7% DD= 40.3% | IS n=1711 PF=0.96 avgR=-0.025 DD=35.2% | OOS n=1530 PF=1.14 avgR=+0.091 DD=18.0%
+pullback need3 K24               n= 2622 (0.91/day) WR= 36.1% W/L=1.94 PF=1.09 avgR=+0.059 CAGR=  +6.6% DD= 15.3% | IS n=1376 PF=1.02 avgR=+0.015 DD=15.3% | OOS n=1246 PF=1.17 avgR=+0.107 DD=14.1%
+pullback need3 max_pos2          n= 4479 (1.55/day) WR= 35.4% W/L=1.95 PF=1.07 avgR=+0.046 CAGR=  +8.1% DD= 36.2% | IS n=2341 PF=1.01 avgR=+0.006 DD=29.9% | OOS n=2138 PF=1.14 avgR=+0.090 DD=22.9%
+breakout8 need3 swing rr2        n= 3001 (1.04/day) WR= 35.7% W/L=1.95 PF=1.08 avgR=+0.052 CAGR=  +6.5% DD= 24.1% | IS n=1553 PF=1.04 avgR=+0.024 DD=14.3% | OOS n=1448 PF=1.13 avgR=+0.082 DD=17.7%
+breakout8 need3 atrSL rr1.5      n= 6332 (2.19/day) WR= 38.5% W/L=1.50 PF=0.94 avgR=-0.038 CAGR= -11.3% DD= 81.9% | IS n=3196 PF=0.90 avgR=-0.060 DD=65.7% | OOS n=3136 PF=0.97 avgR=-0.016 DD=48.8%
+breakout8 need0 (baseline)       n=10033 (3.47/day) WR= 34.2% W/L=1.93 PF=1.00 avgR=+0.001 CAGR=  -1.7% DD= 43.7% | IS n=5413 PF=1.00 avgR=+0.002 DD=43.7% | OOS n=4620 PF=1.00 avgR=+0.000 DD=41.1%
+ema_cross need3 swing rr2        n= 1583 (0.55/day) WR= 34.7% W/L=1.95 PF=1.03 avgR=+0.021 CAGR=  +1.2% DD= 27.2% | IS n= 817 PF=0.93 avgR=-0.046 DD=24.7% | OOS n= 766 PF=1.15 avgR=+0.093 DD=14.3%
+ema_cross need3 atrSL rr2 hold8  n= 2002 (0.69/day) WR= 31.3% W/L=1.94 PF=0.88 avgR=-0.079 CAGR=  -7.3% DD= 58.2% | IS n=1032 PF=0.79 avgR=-0.150 DD=55.7% | OOS n= 970 PF=0.99 avgR=-0.004 DD=32.2%
+
+====================================================================================================
+DETAIL: pullback need3 swing rr2 hold24  2015-01-02 -> 2026-01-30
+====================================================================================================
+trades 3019  WR 35.3%  W/L 1.94  PF 1.06  avgR +0.040  max consec losses 27  avg hold 5.4 h  total +68.5%  CAGR +4.8%  DD 35.2%
+exits: sl 1932 (64%), tp 1003 (33%), time 84 (3%)
+  BUY  n= 2001 WR= 36.2% PF=1.10 avgR=+0.062
+  SELL n= 1018 WR= 33.5% PF=0.99 avgR=-0.004
+
+--- YEARLY ---
+year   trades    WR%   W/L    PF    avgR  return%  maxDD%
+2015      205   34.1  2.04  1.06  +0.037     +3.5     7.8
+2016      287   36.9  1.97  1.16  +0.098    +14.1    10.9
+2017      230   33.9  1.90  0.97  -0.017     -2.5    10.9
+2018      307   34.9  1.93  1.03  +0.023     +2.8    14.1
+2019      268   31.7  1.95  0.90  -0.065     -9.3    11.3
+2020      308   31.8  1.95  0.91  -0.060     -9.2    20.0
+2021      213   33.3  1.90  0.95  -0.033     -3.8    13.1
+2022      301   35.5  1.88  1.04  +0.023     +2.9     7.9
+2023      280   32.1  1.96  0.93  -0.047     -7.3    16.5
+2024      272   38.6  1.94  1.22  +0.134    +19.2     6.1
+2025      319   42.6  1.96  1.46  +0.261    +50.3     6.1
+2026       29   44.8  2.00  1.62  +0.345     +5.0     2.8
+
+--- MONTHLY --- 64/133 positive (48%), avg +0.45%, best +11.3%, worst -11.0%
+year      Jan    Feb    Mar    Apr    May    Jun    Jul    Aug    Sep    Oct    Nov    Dec
+2015     +0.0   +0.0   +0.8   -2.5   -1.2   +2.0  +11.3   -1.3   +0.7   -1.9   -1.3   -2.6
+2016     -2.1  +10.4   -0.1   +7.2   +0.5   +0.4   +1.0   -1.7   -2.0   -1.8   +2.5   -0.2
+2017     -1.0   +2.3   +2.5   -3.5   -0.1   -1.3   +0.3   +0.4   +1.5   +0.6   -3.9   -0.1
+2018     +0.7   -2.5   -1.4   -1.0   -2.5   +5.3   +7.3   +2.4   -3.9   -5.9   -1.0   +6.2
+2019     -3.4   -1.1   -2.5   +0.9   -1.0   +4.8   -3.3   +1.7   -0.0   +1.0   -4.9   -1.4
+2020     +1.5   +4.4   +0.7   -1.7   -1.0   -4.3   +3.3   +1.0   -0.7  -11.0   -0.2   -0.9
+2021     -1.0   +2.8   +3.5   +0.0   -5.3   -1.2   -2.0   +2.0   -1.1   -0.5   -2.6   +2.1
+2022     -5.1   +6.0   -1.9   -0.0   +1.6   -3.4   -1.1   +4.3   +2.0   -0.6   +0.7   +0.9
+2023     -2.7   -0.0   -3.9   +4.0   -1.0   -5.5   -2.5   -0.5   +1.8   -1.0   +2.2   +2.0
+2024     -0.5   -2.3   +7.2   +1.1   +0.3   +3.0   +1.2   -1.0   +3.7   +5.0   +0.5   -0.0
+2025     +8.2   +3.4   +6.0   +4.8   +2.0   +1.0   +4.5   -1.6   +3.0   +2.2   +2.1   +6.2
+2026     +5.0                                                                             
+
+entries by hour (server): 00h 4, 01h 125, 02h 106, 03h 99, 04h 137, 05h 103, 06h 87, 07h 113, 08h 119, 09h 141, 10h 156, 11h 134, 12h 141, 13h 131, 14h 139, 15h 233, 16h 198, 17h 184, 18h 148, 19h 149, 20h 125, 21h 110, 22h 89, 23h 48
+
+done in 65s
