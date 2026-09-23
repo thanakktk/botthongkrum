@@ -77,6 +77,7 @@ class Cfg:
         self.entry = "pullback"; self.need = 3; self.tfs = ("D1", "H4", "H1")
         self.K = 24; self.N = 8; self.sl = "swing"; self.rr = 2.0; self.tp = "rr"
         self.hold_h = 24; self.side = "both"; self.exit_flip = False; self.max_pos = 1
+        self.sl_usd = 5.0; self.tp_usd = 10.0          # for sl="fixed" / tp="fixed" ($ per oz; 500 points = $5)
         for a, b in kw.items():
             setattr(self, a, b)
 
@@ -165,9 +166,12 @@ def simulate(cfg: Cfg, L, HT, cost, risk, cost_bps=0.0):
         if cfg.sl == "swing":
             dist = (e - swing_lo[i]) if d > 0 else (swing_hi[i] - e)
             dist = min(max(dist + 0.1 * a[i], 0.5 * a[i]), 2.0 * a[i])
+        elif cfg.sl == "fixed":
+            dist = cfg.sl_usd
         else:
             dist = 1.0 * a[i]
         if cfg.tp == "htf" and not np.isnan(h4a[i]): tpd = 1.0 * h4a[i]
+        elif cfg.tp == "fixed": tpd = cfg.tp_usd
         else: tpd = cfg.rr * dist
         pos.append(dict(d=d, e=e, sl=e - d * dist, tp=e + d * tpd, rd=dist, hold=0, i=i, eq0=eq))
         last_entry_i = i
@@ -237,7 +241,17 @@ def detail(label, trades, eq, t, out, ltf):
                         f"{x['r']:.3f}", x["why"], f"{x['hold']*SECS[ltf]/3600:.2f}"])
 
 
-def variants(sweep):
+def variants(sweep, fixed=False):
+    if fixed:
+        out = [("pullback 3/3 swing SL 2R (reference)", Cfg())]
+        for sl, tp in ((5, 10), (5, 12.5), (5, 15), (7.5, 15), (10, 20), (10, 15), (3, 9)):
+            out.append((f"pullback 3/3 SL${sl:g} TP${tp:g}", Cfg(sl="fixed", tp="fixed", sl_usd=sl, tp_usd=tp)))
+        out.append(("pullback 3/3 SL$5 TP$15 hold0", Cfg(sl="fixed", tp="fixed", sl_usd=5, tp_usd=15, hold_h=0)))
+        out.append(("pullback 3/3 SL$5 TP$15 buy-only", Cfg(sl="fixed", tp="fixed", sl_usd=5, tp_usd=15, side="buy")))
+        for sl, tp in ((5, 10), (5, 15), (10, 20)):
+            out.append((f"breakout 3/3 SL${sl:g} TP${tp:g}", Cfg(entry="breakout", sl="fixed", tp="fixed", sl_usd=sl, tp_usd=tp)))
+        out.append(("pullback NO HTF SL$5 TP$15", Cfg(need=0, sl="fixed", tp="fixed", sl_usd=5, tp_usd=15)))
+        return out
     if not sweep:
         return [("pullback need3 K24 swing rr2 hold24 (EA default)", Cfg()), ("breakout8 need3 swing rr2", Cfg(entry="breakout"))]
     return [
@@ -283,6 +297,7 @@ def main():
     ap.add_argument("--oos", type=int, default=2021)
     ap.add_argument("--cost", type=float, default=0.25); ap.add_argument("--risk", type=float, default=0.005)
     ap.add_argument("--cost-bps", type=float, default=0.0, help="cost as basis points of price instead of $ (0.625 = $0.25 at $4000)")
+    ap.add_argument("--fixed", action="store_true", help="fixed-point SL/TP variants (500 pts SL, 1000-1500 pts TP)")
     ap.add_argument("--sweep", action="store_true"); ap.add_argument("--detail", default="pullback need3 K24 swing rr2 hold24 (EA default)")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
@@ -307,7 +322,7 @@ def main():
     P(f"MTF bot — bias D1/H4/H1 (EMA20/50), entries on {args.ltf} — XAUUSD {ltf_bars[0].time:%Y-%m-%d} -> {ltf_bars[-1].time:%Y-%m-%d} "
       f"({len(ltf_bars)} {args.ltf} bars, {years:.1f} yr), cost {('%.3f bps of price' % args.cost_bps) if args.cost_bps else ('$%s/oz' % args.cost)}, risk {args.risk*100:.2f}%/trade, IS < {args.oos} <= OOS\n")
     res = {}
-    for label, cfg in variants(args.sweep):
+    for label, cfg in variants(args.sweep, args.fixed):
         trades, eq = simulate(cfg, L, HT, args.cost, args.risk, args.cost_bps)
         res[label] = (trades, eq)
         P(line(label, trades, eq, L["t"], years, oos_ts)); tee.flush()

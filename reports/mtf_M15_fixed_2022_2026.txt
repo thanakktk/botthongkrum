@@ -1,0 +1,18 @@
+MTF bot — bias D1/H4/H1 (EMA20/50), entries on M15 — XAUUSD 2022-01-03 -> 2026-01-30 (93728 M15 bars, 4.1 yr), cost $0.25/oz, risk 0.50%/trade, IS < 2025 <= OOS
+
+pullback 3/3 swing SL 2R (reference) n=  986 (0.93/day) WR= 38.0% W/L=1.93 PF=1.18 avgR=+0.112 CAGR= +13.8% DD= 12.8% | IS n= 682 PF=1.09 avgR=+0.058 DD=12.8% | OOS n= 304 PF=1.40 avgR=+0.233 DD= 6.1%
+pullback 3/3 SL$5 TP$10          n= 1089 (1.02/day) WR= 35.4% W/L=1.97 PF=1.08 avgR=+0.054 CAGR=  +6.7% DD= 16.6% | IS n= 719 PF=1.06 avgR=+0.041 DD=16.6% | OOS n= 370 PF=1.12 avgR=+0.078 DD= 8.4%
+pullback 3/3 SL$5 TP$12.5        n= 1038 (0.98/day) WR= 31.5% W/L=2.41 PF=1.11 avgR=+0.073 CAGR=  +8.8% DD= 15.6% | IS n= 675 PF=1.06 avgR=+0.041 DD=15.6% | OOS n= 363 PF=1.20 avgR=+0.133 DD=12.1%
+pullback 3/3 SL$5 TP$15          n=  985 (0.93/day) WR= 28.2% W/L=2.81 PF=1.10 avgR=+0.075 CAGR=  +8.5% DD= 16.8% | IS n= 631 PF=1.07 avgR=+0.049 DD=16.8% | OOS n= 354 PF=1.17 avgR=+0.122 DD=10.7%
+pullback 3/3 SL$7.5 TP$15        n=  880 (0.83/day) WR= 38.0% W/L=1.84 PF=1.13 avgR=+0.078 CAGR=  +8.3% DD=  9.0% | IS n= 542 PF=1.10 avgR=+0.059 DD= 9.0% | OOS n= 338 PF=1.18 avgR=+0.110 DD= 7.5%
+pullback 3/3 SL$10 TP$20         n=  737 (0.69/day) WR= 41.1% W/L=1.72 PF=1.20 avgR=+0.112 CAGR= +10.2% DD=  9.2% | IS n= 445 PF=1.12 avgR=+0.064 DD= 9.2% | OOS n= 292 PF=1.31 avgR=+0.185 DD= 6.4%
+pullback 3/3 SL$10 TP$15         n=  816 (0.77/day) WR= 45.6% W/L=1.40 PF=1.17 avgR=+0.091 CAGR=  +9.1% DD=  9.4% | IS n= 491 PF=1.11 avgR=+0.057 DD= 9.4% | OOS n= 325 PF=1.26 avgR=+0.142 DD= 6.8%
+pullback 3/3 SL$3 TP$9           n= 1189 (1.12/day) WR= 25.7% W/L=2.99 PF=1.03 avgR=+0.024 CAGR=  +2.4% DD= 23.9% | IS n= 815 PF=1.03 avgR=+0.023 DD=23.9% | OOS n= 374 PF=1.04 avgR=+0.027 DD=18.0%
+pullback 3/3 SL$5 TP$15 hold0    n=  955 (0.90/day) WR= 26.8% W/L=3.00 PF=1.10 avgR=+0.072 CAGR=  +7.8% DD= 17.5% | IS n= 602 PF=1.06 avgR=+0.043 DD=17.5% | OOS n= 353 PF=1.17 avgR=+0.122 DD=10.7%
+pullback 3/3 SL$5 TP$15 buy-only n=  787 (0.74/day) WR= 28.1% W/L=2.89 PF=1.13 avgR=+0.091 CAGR=  +8.4% DD= 16.1% | IS n= 433 PF=1.09 avgR=+0.066 DD=16.1% | OOS n= 354 PF=1.17 avgR=+0.122 DD=10.7%
+breakout 3/3 SL$5 TP$10          n= 1581 (1.49/day) WR= 34.6% W/L=1.98 PF=1.05 avgR=+0.032 CAGR=  +5.4% DD= 18.4% | IS n= 867 PF=1.07 avgR=+0.044 DD=12.6% | OOS n= 714 PF=1.03 avgR=+0.017 DD=18.4%
+breakout 3/3 SL$5 TP$15          n= 1295 (1.22/day) WR= 27.2% W/L=2.87 PF=1.07 avgR=+0.052 CAGR=  +7.3% DD= 15.9% | IS n= 698 PF=1.05 avgR=+0.035 DD=13.3% | OOS n= 597 PF=1.10 avgR=+0.072 DD=15.9%
+breakout 3/3 SL$10 TP$20         n=  838 (0.79/day) WR= 40.5% W/L=1.76 PF=1.19 avgR=+0.112 CAGR= +11.7% DD=  8.7% | IS n= 435 PF=1.14 avgR=+0.077 DD= 8.7% | OOS n= 403 PF=1.25 avgR=+0.150 DD= 7.7%
+pullback NO HTF SL$5 TP$15       n= 2711 (2.55/day) WR= 24.3% W/L=2.78 PF=0.89 avgR=-0.080 CAGR= -25.0% DD= 74.6% | IS n=1896 PF=0.90 avgR=-0.078 DD=62.3% | OOS n= 815 PF=0.89 avgR=-0.084 DD=34.3%
+
+done in 17s

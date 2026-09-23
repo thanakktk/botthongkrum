@@ -22,8 +22,8 @@
 #include <Trade\Trade.mqh>
 
 enum ENUM_SIDE { SIDE_BOTH = 0, SIDE_BUY = 1, SIDE_SELL = 2 };
-enum ENUM_SL   { SL_SWING = 0, SL_ATR = 1 };
-enum ENUM_TP   { TP_RR = 0, TP_H4ATR = 1 };
+enum ENUM_SL   { SL_SWING = 0, SL_ATR = 1, SL_POINTS = 2 };
+enum ENUM_TP   { TP_RR = 0, TP_H4ATR = 1, TP_POINTS = 2 };
 
 //--- higher-timeframe bias
 input bool   UseD1              = true;
@@ -35,11 +35,13 @@ input int    BiasSlow           = 50;      // EMA slow on each HTF
 //--- entry on the chart timeframe
 input int    K                  = 24;      // pullback window (bars) / swing length (24 on M15 = 6 h; best of 21 tested)
 input int    EmaEntry           = 20;      // LTF EMA the price must pull back to
-input ENUM_SL StopMode          = SL_SWING;
+input ENUM_SL StopMode          = SL_SWING; // SL_POINTS = fixed SlPoints (500 = $5.00 on a 2-digit gold quote)
+input int    SlPoints           = 500;     // used when StopMode = SL_POINTS
 input double SwingPadAtr        = 0.1;     // swing stop padding, x ATR
 input double MinStopAtr         = 0.5;     // clamp for the swing stop
 input double MaxStopAtr         = 2.0;
-input ENUM_TP TpMode            = TP_RR;
+input ENUM_TP TpMode            = TP_RR;   // TP_POINTS = fixed TpPoints (1000-1500 = $10-15)
+input int    TpPoints           = 1500;    // used when TpMode = TP_POINTS
 input double RR                 = 2.0;     // TP = RR x stop distance
 input int    MaxHoldHours       = 24;      // 0 = no time exit
 input bool   ExitOnH1Flip       = false;   // close when the H1 bias turns against the trade
@@ -231,9 +233,11 @@ void OpenTrade(int dir, double swing, double atrv, int d1, int h4, int h1, datet
       dist = dir > 0 ? px - swing : swing - px;
       dist = MathMin(MathMax(dist + SwingPadAtr * atrv, MinStopAtr * atrv), MaxStopAtr * atrv);
    }
+   else if(StopMode == SL_POINTS) dist = SlPoints * _Point;
    else dist = 1.0 * atrv;
    double tpd = RR * dist;
    if(TpMode == TP_H4ATR) { double h4a = Buf(g_h4atr, 1); if(h4a > 0) tpd = h4a; }
+   else if(TpMode == TP_POINTS) tpd = TpPoints * _Point;
    double sl = NormalizeDouble(px - dir * dist, _Digits), tp = NormalizeDouble(px + dir * tpd, _Digits);
    double lots = SizeLots(dir, px, sl);
    if(g_dump != INVALID_HANDLE)

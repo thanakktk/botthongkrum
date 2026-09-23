@@ -118,3 +118,4 @@ Webhook ใส่เป็นค่า default ใน input `DiscordWebhook` แ
 - backtest 2015–2026 M15 (ต้นทุนยุคปัจจุบัน): 2,622 ไม้ (0.9/วัน), WR 36 %, W/L 1.94, **PF 1.09**, IS 1.02 / OOS 1.17, +6.6 %/ปี ที่ risk 0.5 %, max DD 15 %; 2024–26 PF 1.2–1.4 · M5 แย่กว่าทุกแบบ (ไม่แนะนำ)
 - Discord เหมือน HourlySet (เปิด/ปิด/สรุปรายวัน/เป้ารายวัน/hard stop) ใส่ webhook ใน input `DiscordWebhook` หรือ Load `MTF_local.set`
 - Inputs หลัก: `NeedVotes` 3, `K` 24, `RR` 2.0, `MaxHoldHours` 24, `ExitOnH1Flip` false, `Side` both, `RiskPct` 0.5, `MagicNumber` 747001
+- SL/TP แบบจุดคงที่: `StopMode=SL_POINTS` + `SlPoints` (500 = $5), `TpMode=TP_POINTS` + `TpPoints` (1000–1500) — ทดสอบแล้ว SL 500/TP 1500 PF 1.10–1.15, SL 1000/TP 2000 PF 1.20–1.30 (ดีสุด), swing SL default PF 1.18–1.36 (ดู docs/mtf_bot.md ข้อ 5)
