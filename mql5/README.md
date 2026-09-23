@@ -117,5 +117,6 @@ Webhook ใส่เป็นค่า default ใน input `DiscordWebhook` แ
 - เข้า: ใน 24 แท่ง M15 ราคาแตะ EMA20 แล้วแท่งล่าสุดปิดกลับเหนือ EMA20 และเหนือ high แท่งก่อน; SL ใต้ swing (0.5–2 ATR); TP 2R; ปิดเมื่อครบ 24 ชม.; 1 ไม้ต่อรอบย่อตัว
 - backtest 2015–2026 M15 (ต้นทุนยุคปัจจุบัน): 2,622 ไม้ (0.9/วัน), WR 36 %, W/L 1.94, **PF 1.09**, IS 1.02 / OOS 1.17, +6.6 %/ปี ที่ risk 0.5 %, max DD 15 %; 2024–26 PF 1.2–1.4 · M5 แย่กว่าทุกแบบ (ไม่แนะนำ)
 - Discord เหมือน HourlySet (เปิด/ปิด/สรุปรายวัน/เป้ารายวัน/hard stop) ใส่ webhook ใน input `DiscordWebhook` หรือ Load `MTF_local.set`
-- Inputs หลัก: `NeedVotes` 3, `K` 24, `RR` 2.0, `MaxHoldHours` 24, `ExitOnH1Flip` false, `Side` both, `RiskPct` 0.5, `MagicNumber` 747001
+- **v2 (default ปัจจุบัน)**: gate คุณภาพ 4 ตัว (เข้าเฉพาะ 15:00–24:00 server, D1 EMA gap ≥ 0.7 ATR, H4 ทิศเดิม ≥ 6 แท่ง, H1 RSI ฝั่งเทรนด์ > 51) + TP 3R + break-even ที่ 1R → 2015–26: 728 ไม้ (~1.3/สัปดาห์), **WR 51 %, PF 1.44, IS 1.43 / OOS 1.44, max DD 5.8 %**, +7 %/ปี ที่ risk 0.5 %, 2024–26 PF 1.61 (docs/mtf_bot.md ข้อ 6)
+- Inputs หลัก: `NeedVotes` 3, `K` 24, `RR` 3.0, `BreakEvenR` 1.0, `SessionStartHour/EndHour` 15/24, `MinD1StrengthAtr` 0.7, `MinH4BiasAgeBars` 6, `MinH1RsiDir` 51, `MaxHoldHours` 24, `Side` both, `RiskPct` 0.5, `MagicNumber` 747001
 - SL/TP แบบจุดคงที่: `StopMode=SL_POINTS` + `SlPoints` (500 = $5), `TpMode=TP_POINTS` + `TpPoints` (1000–1500) — ทดสอบแล้ว SL 500/TP 1500 PF 1.10–1.15, SL 1000/TP 2000 PF 1.20–1.30 (ดีสุด), swing SL default PF 1.18–1.36 (ดู docs/mtf_bot.md ข้อ 5)

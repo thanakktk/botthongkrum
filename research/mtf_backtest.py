@@ -78,11 +78,16 @@ class Cfg:
         self.K = 24; self.N = 8; self.sl = "swing"; self.rr = 2.0; self.tp = "rr"
         self.hold_h = 24; self.side = "both"; self.exit_flip = False; self.max_pos = 1
         self.sl_usd = 5.0; self.tp_usd = 10.0          # for sl="fixed" / tp="fixed" ($ per oz; 500 points = $5)
+        self.be_r = 0.0        # move SL to entry once +be_r R reached (0 = off)
+        self.trail_r = 0.0     # trail SL trail_r R behind the best price once +trail_r R reached (0 = off)
+        self.min_stop_atr = 0.5; self.max_stop_atr = 2.0
         for a, b in kw.items():
             setattr(self, a, b)
 
 
-def simulate(cfg: Cfg, L, HT, cost, risk, cost_bps=0.0):
+def simulate(cfg: Cfg, L, HT, cost, risk, cost_bps=0.0, feat=None, gate=None):
+    # feat: optional {name: array over LTF bars} recorded on each trade at its entry bar
+    # gate: optional boolean array over LTF bars, or {1: buy_gate, -1: sell_gate}; entries only where True
     """L: LTF arrays (+ precomputed e20,e9,e21,atr); HT: {tf: (arrays, bias, atr, asof_idx)}"""
     n = len(L["t"]); c, h, l = L["c"], L["h"], L["l"]
     e20, e9, e21, a = L["e20"], L["e9"], L["e21"], L["atr"]
@@ -139,11 +144,22 @@ def simulate(cfg: Cfg, L, HT, cost, risk, cost_bps=0.0):
                 if h[i] >= sl: res, why = sl, "sl"
                 elif l[i] <= tp: res, why = tp, "tp"
             p["hold"] += 1
+            if res is None and (cfg.be_r or cfg.trail_r):
+                fav = (h[i] - e) if d > 0 else (e - l[i])
+                p["best"] = max(p.get("best", 0.0), fav)
+                if cfg.be_r and p["best"] >= cfg.be_r * p["rd"] and (sl - e) * d < 0:
+                    sl = e + d * 0.05 * p["rd"]; p["sl"] = sl
+                if cfg.trail_r and p["best"] >= cfg.trail_r * p["rd"]:
+                    new_sl = (e + d * (p["best"] - cfg.trail_r * p["rd"]))
+                    if (new_sl - sl) * d > 0: sl = new_sl; p["sl"] = sl
             if res is None and max_hold and p["hold"] >= max_hold: res, why = c[i], "time"
             if res is None and cfg.exit_flip and h1b[i] == -d: res, why = c[i], "flip"
             if res is not None:
                 r = d * (res - e) / p["rd"]; eq += p["eq0"] * risk * r
-                trades.append(dict(open_t=L["t"][p["i"]], close_t=L["t"][i], d=d, r=r, why=why, hold=p["hold"], e=e, sl=sl, tp=tp, exit=res))
+                rec = dict(open_t=L["t"][p["i"]], close_t=L["t"][i], d=d, r=r, why=why, hold=p["hold"], e=e, sl=sl, tp=tp, exit=res, rd=p["rd"])
+                if feat is not None:
+                    for k, v in feat.items(): rec[k] = float(v[p["i"]])
+                trades.append(rec)
                 closed.append(p)
         for p in closed: pos.remove(p)
         eq_curve[i] = eq + sum(p["eq0"] * risk * p["d"] * (c[i] - p["e"]) / p["rd"] for p in pos)
@@ -157,6 +173,9 @@ def simulate(cfg: Cfg, L, HT, cost, risk, cost_bps=0.0):
             if dirv[i] > 0 and trig_up[i]: d = 1
             elif dirv[i] < 0 and trig_dn[i]: d = -1
         if d == 0: continue
+        if gate is not None:
+            g = gate[d][i] if isinstance(gate, dict) else gate[i]
+            if not g: continue
         if cfg.side == "buy" and d < 0: continue
         if cfg.side == "sell" and d > 0: continue
         if cfg.entry == "pullback":
@@ -165,7 +184,7 @@ def simulate(cfg: Cfg, L, HT, cost, risk, cost_bps=0.0):
         e = c[i] + d * (cost if cost_bps == 0 else c[i] * cost_bps / 1e4)
         if cfg.sl == "swing":
             dist = (e - swing_lo[i]) if d > 0 else (swing_hi[i] - e)
-            dist = min(max(dist + 0.1 * a[i], 0.5 * a[i]), 2.0 * a[i])
+            dist = min(max(dist + 0.1 * a[i], cfg.min_stop_atr * a[i]), cfg.max_stop_atr * a[i])
         elif cfg.sl == "fixed":
             dist = cfg.sl_usd
         else:

@@ -42,12 +42,23 @@ input double MinStopAtr         = 0.5;     // clamp for the swing stop
 input double MaxStopAtr         = 2.0;
 input ENUM_TP TpMode            = TP_RR;   // TP_POINTS = fixed TpPoints (1000-1500 = $10-15)
 input int    TpPoints           = 1500;    // used when TpMode = TP_POINTS
-input double RR                 = 2.0;     // TP = RR x stop distance
+input double RR                 = 3.0;     // TP = RR x stop distance (3R + BreakEvenR 1 = best of the v2 study)
 input int    MaxHoldHours       = 24;      // 0 = no time exit
 input bool   ExitOnH1Flip       = false;   // close when the H1 bias turns against the trade
 input ENUM_SIDE Side            = SIDE_BOTH;
 input int    MaxPositions       = 1;
 input int    AtrN               = 14;
+//--- v2 quality gates (research/mtf_v2.py; 0 / -1 = off)
+input int    SessionStartHour   = 15;      // entries only from this server hour (inclusive) ...
+input int    SessionEndHour     = 24;      // ... to this hour (exclusive); 0/24 = whole day
+input double MinD1StrengthAtr   = 0.7;     // D1 (EMA20-EMA50)/ATR in the trade direction must exceed this (0 = off)
+input int    MinH4BiasAgeBars   = 6;       // H4 bias must have held at least this many closed H4 bars (0 = off)
+input double MinH1RsiDir        = 51.0;    // H1 RSI(14) in the trade direction (100-RSI for sells) must exceed (0 = off)
+input int    MinD1BiasAgeDays   = 0;       // D1 bias age in days (0 = off; 4 tested)
+input double MinAtrRatio        = 0.0;     // M15 ATR / its 96-bar mean must exceed (0 = off; 0.75 tested)
+input double MinTriggerDistAtr  = 0.0;     // trigger close beyond the M15 EMA20 by this x ATR (0 = off; 0.3 tested)
+input double MinD1Adx           = 0.0;     // D1 ADX(14) must exceed (0 = off; 16 tested)
+input double BreakEvenR         = 1.0;     // move SL to entry (+0.05R) once price reaches this R (0 = off)
 //--- daily goal (optional)
 input double DailyTargetPct     = 0.0;     // stop for the day at +x% of the day-start balance (0 = off)
 input double DailyStopPct       = 0.0;     // stop for the day at -x% (0 = off)
@@ -74,7 +85,8 @@ datetime g_lastBar = 0;
 int      g_dump = INVALID_HANDLE;
 string   g_gvPrefix;
 int      g_d1f = INVALID_HANDLE, g_d1s = INVALID_HANDLE, g_h4f = INVALID_HANDLE, g_h4s = INVALID_HANDLE,
-         g_h1f = INVALID_HANDLE, g_h1s = INVALID_HANDLE, g_ltfEma = INVALID_HANDLE, g_h4atr = INVALID_HANDLE;
+         g_h1f = INVALID_HANDLE, g_h1s = INVALID_HANDLE, g_ltfEma = INVALID_HANDLE, g_h4atr = INVALID_HANDLE,
+         g_h1rsi = INVALID_HANDLE, g_d1adx = INVALID_HANDLE;
 
 //+------------------------------------------------------------------+
 string GV(const string key) { return g_gvPrefix + key; }
@@ -93,6 +105,9 @@ int OnInit()
    g_h1f = iMA(_Symbol, PERIOD_H1, BiasFast, 0, MODE_EMA, PRICE_CLOSE); g_h1s = iMA(_Symbol, PERIOD_H1, BiasSlow, 0, MODE_EMA, PRICE_CLOSE);
    g_ltfEma = iMA(_Symbol, _Period, EmaEntry, 0, MODE_EMA, PRICE_CLOSE);
    g_h4atr = iATR(_Symbol, PERIOD_H4, AtrN);
+   g_h1rsi = iRSI(_Symbol, PERIOD_H1, 14, PRICE_CLOSE);
+   g_d1adx = iADX(_Symbol, PERIOD_D1, 14);
+   if(g_h1rsi == INVALID_HANDLE || g_d1adx == INVALID_HANDLE) return INIT_FAILED;
    if(g_d1f == INVALID_HANDLE || g_d1s == INVALID_HANDLE || g_h4f == INVALID_HANDLE || g_h4s == INVALID_HANDLE ||
       g_h1f == INVALID_HANDLE || g_h1s == INVALID_HANDLE || g_ltfEma == INVALID_HANDLE || g_h4atr == INVALID_HANDLE) return INIT_FAILED;
    if(GVget("cap0", 0) <= 0) GVset("cap0", InitialCapital > 0 ? InitialCapital : AccountInfoDouble(ACCOUNT_BALANCE));
@@ -102,8 +117,9 @@ int OnInit()
       g_dump = FileOpen(DumpFile, FILE_WRITE | FILE_CSV | FILE_COMMON | FILE_ANSI, ',');
       if(g_dump != INVALID_HANDLE) FileWrite(g_dump, "bar_time", "dir", "entry", "sl", "tp", "d1", "h4", "h1");
    }
-   PrintFormat("MTF init: entry tf=%s bias D1=%d H4=%d H1=%d need=%d K=%d rr=%.2f hold=%dh side=%d cap0=%.2f",
-               EnumToString(_Period), UseD1, UseH4, UseH1, NeedVotes, K, RR, MaxHoldHours, (int)Side, GVget("cap0"));
+   PrintFormat("MTF init: entry tf=%s bias D1=%d H4=%d H1=%d need=%d K=%d rr=%.2f BE=%.2fR hold=%dh side=%d session=%d-%d gates: D1str>=%.2f H4age>=%d H1rsi>%.0f D1age>=%d atrRatio>%.2f trig>=%.2f D1adx>%.0f cap0=%.2f",
+               EnumToString(_Period), UseD1, UseH4, UseH1, NeedVotes, K, RR, BreakEvenR, MaxHoldHours, (int)Side, SessionStartHour, SessionEndHour,
+               MinD1StrengthAtr, MinH4BiasAgeBars, MinH1RsiDir, MinD1BiasAgeDays, MinAtrRatio, MinTriggerDistAtr, MinD1Adx, GVget("cap0"));
    if(!MQLInfoInteger(MQL_TESTER))
       Notify("EA เริ่มทำงาน (MTF)", StringFormat("%s เข้าที่ %s | ทิศจาก D1/H4/H1 (ต้องตรงกัน %d) | balance %.2f | เสี่ยง %.2f%%/ไม้ | ถือสูงสุด %d ชม.",
              _Symbol, EnumToString(_Period), NeedVotes, AccountInfoDouble(ACCOUNT_BALANCE), RiskPct, MaxHoldHours), 0x3498DB);
@@ -113,8 +129,8 @@ int OnInit()
 void OnDeinit(const int reason)
 {
    if(g_dump != INVALID_HANDLE) FileClose(g_dump);
-   int hs[8] = {g_d1f, g_d1s, g_h4f, g_h4s, g_h1f, g_h1s, g_ltfEma, g_h4atr};
-   for(int i = 0; i < 8; i++) if(hs[i] != INVALID_HANDLE) IndicatorRelease(hs[i]);
+   int hs[10] = {g_d1f, g_d1s, g_h4f, g_h4s, g_h1f, g_h1s, g_ltfEma, g_h4atr, g_h1rsi, g_d1adx};
+   for(int i = 0; i < 10; i++) if(hs[i] != INVALID_HANDLE) IndicatorRelease(hs[i]);
 }
 
 //+------------------------------------------------------------------+
@@ -146,6 +162,68 @@ int Direction(int &d1, int &h4, int &h1)
    if(bull >= NeedVotes && bear == 0) return 1;
    if(bear >= NeedVotes && bull == 0) return -1;
    return 0;
+}
+
+// closed bars the HTF bias has held its current value (walks back the EMA buffers)
+int BiasAge(ENUM_TIMEFRAMES tf, int hf, int hs, int maxBars = 400)
+{
+   double f[], s[]; ArraySetAsSeries(f, true); ArraySetAsSeries(s, true);
+   if(CopyBuffer(hf, 0, 1, maxBars, f) < maxBars || CopyBuffer(hs, 0, 1, maxBars, s) < maxBars) return 0;
+   int cur = 0;
+   for(int k = 0; k < maxBars; k++)
+   {
+      double c = iClose(_Symbol, tf, k + 1);
+      int b = (f[k] > s[k] && c > s[k]) ? 1 : (f[k] < s[k] && c < s[k]) ? -1 : 0;
+      if(k == 0) cur = b;
+      else if(b != cur) return k;
+   }
+   return maxBars;
+}
+
+// simple-mean ATR over the last n closed bars ending at shift `from` (1 = last closed)
+double AtrClosedAt(const MqlRates &r[], int from, int n)
+{
+   double s = 0;
+   for(int i = from; i < from + n; i++)
+      s += MathMax(r[i].high - r[i].low, MathMax(MathAbs(r[i].high - r[i + 1].close), MathAbs(r[i].low - r[i + 1].close)));
+   return s / n;
+}
+
+// every v2 gate; returns "" when all pass, else the name of the failing one
+string GateFail(int dir, const MqlRates &r[], double atrv)
+{
+   MqlDateTime dt; TimeToStruct(r[1].time, dt);
+   int h = dt.hour;
+   if(SessionStartHour < SessionEndHour && (h < SessionStartHour || h >= SessionEndHour)) return "session";
+   if(SessionStartHour > SessionEndHour && (h < SessionStartHour && h >= SessionEndHour)) return "session";
+   if(MinD1StrengthAtr > 0)
+   {
+      double f = Buf(g_d1f, 1), s = Buf(g_d1s, 1); double a[1];
+      int hAtr = iATR(_Symbol, PERIOD_D1, AtrN);
+      double d1atr = (hAtr != INVALID_HANDLE && CopyBuffer(hAtr, 0, 1, 1, a) == 1) ? a[0] : 0;
+      if(hAtr != INVALID_HANDLE) IndicatorRelease(hAtr);
+      if(d1atr <= 0 || dir * (f - s) / d1atr < MinD1StrengthAtr) return "D1 strength";
+   }
+   if(MinH4BiasAgeBars > 0 && BiasAge(PERIOD_H4, g_h4f, g_h4s) < MinH4BiasAgeBars) return "H4 bias age";
+   if(MinD1BiasAgeDays > 0 && BiasAge(PERIOD_D1, g_d1f, g_d1s, 200) < MinD1BiasAgeDays) return "D1 bias age";
+   if(MinH1RsiDir > 0)
+   {
+      double rs = Buf(g_h1rsi, 1); if(dir < 0) rs = 100 - rs;
+      if(rs <= MinH1RsiDir) return "H1 RSI";
+   }
+   if(MinD1Adx > 0 && Buf(g_d1adx, 1) <= MinD1Adx) return "D1 ADX";
+   if(MinAtrRatio > 0)
+   {
+      double sum = 0; int cnt = 0;
+      for(int k = 1; k <= 96 && k + AtrN < ArraySize(r); k++) { sum += AtrClosedAt(r, k, AtrN); cnt++; }
+      if(cnt > 0 && atrv / (sum / cnt) <= MinAtrRatio) return "ATR ratio";
+   }
+   if(MinTriggerDistAtr > 0)
+   {
+      double e = Buf(g_ltfEma, 1);
+      if(dir * (r[1].close - e) / atrv < MinTriggerDistAtr) return "trigger dist";
+   }
+   return "";
 }
 
 double AtrClosed(const MqlRates &r[], int n)
@@ -247,6 +325,8 @@ void OpenTrade(int dir, double swing, double atrv, int d1, int h4, int h1, datet
    bool ok = dir > 0 ? trade.Buy(lots, _Symbol, 0, sl, tp, cmt) : trade.Sell(lots, _Symbol, 0, sl, tp, cmt);
    if(!ok || trade.ResultRetcode() != TRADE_RETCODE_DONE) { PrintFormat("order failed %d %s", trade.ResultRetcode(), trade.ResultRetcodeDescription()); return; }
    GVset("lastentry", (double)barTime);
+   { ulong tk = 0; for(int i = PositionsTotal() - 1; i >= 0; i--) { ulong t = PositionGetTicket(i); if(Ours(t) && PositionGetInteger(POSITION_TIME) >= TimeCurrent() - 5) { tk = t; break; } }
+     if(tk > 0) GVset("rd_" + IntegerToString(tk), MathAbs(PositionGetDouble(POSITION_PRICE_OPEN) - sl)); }
    PrintFormat("%s %.2f @ %.2f sl %.2f tp %.2f (bias D1 %d H4 %d H1 %d)", dir > 0 ? "BUY" : "SELL", lots, px, sl, tp, d1, h4, h1);
    Notify(StringFormat("เปิดไม้ %s %s %.2f lot", dir > 0 ? "BUY" : "SELL", _Symbol, lots),
           StringFormat("ทิศจาก D1 %s / H4 %s / H1 %s\nจังหวะ: ย่อตัวแตะ EMA%d บน %s แล้วแท่งยืนยัน\nราคาเข้า: %.2f\nSL: %.2f  (%.2f จุด = %.1f ATR, เสี่ยง $%.2f)\nTP: %.2f  (%.1fR)\nถือได้สูงสุด: %d ชม.\nไม้ที่เปิดอยู่: %d",
@@ -270,7 +350,24 @@ void Manage()
       if(MaxHoldHours > 0 && now - (datetime)PositionGetInteger(POSITION_TIME) >= MaxHoldHours * 3600)
       { trade.PositionClose(t); PrintFormat("close #%I64u (max hold %dh)", t, MaxHoldHours); continue; }
       if(ExitOnH1Flip && h1now == -d)
-      { trade.PositionClose(t); PrintFormat("close #%I64u (H1 bias flipped)", t); }
+      { trade.PositionClose(t); PrintFormat("close #%I64u (H1 bias flipped)", t); continue; }
+      if(BreakEvenR > 0)
+      {
+         double entry = PositionGetDouble(POSITION_PRICE_OPEN), sl = PositionGetDouble(POSITION_SL);
+         double rd = GVget("rd_" + IntegerToString(t), 0);
+         if(rd <= 0) { rd = MathAbs(entry - sl); GVset("rd_" + IntegerToString(t), rd); }
+         if(rd <= 0) continue;
+         double px = d > 0 ? SymbolInfoDouble(_Symbol, SYMBOL_BID) : SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+         double be = NormalizeDouble(entry + d * 0.05 * rd, _Digits);
+         if(d * (px - entry) >= BreakEvenR * rd && d * (sl - entry) < 0)
+         {
+            if(trade.PositionModify(t, be, PositionGetDouble(POSITION_TP)))
+            {
+               PrintFormat("#%I64u break-even: SL -> %.2f", t, be);
+               Notify("ย้าย SL ไป break-even", StringFormat("#%I64u ราคาไปได้ %.1fR แล้ว -> SL %.2f (กันขาดทุน)", t, BreakEvenR, be), 0xF1C40F);
+            }
+         }
+      }
    }
 }
 
@@ -418,6 +515,7 @@ void OnTick()
 
    MqlRates r[]; ArraySetAsSeries(r, true);
    int need = MathMax(K, AtrN) + 3;
+   if(MinAtrRatio > 0) need = MathMax(need, 96 + AtrN + 3);
    if(CopyRates(_Symbol, _Period, 0, need, r) < need) return;
    double atrv = AtrClosed(r, AtrN);
    if(atrv <= 0) return;
@@ -427,6 +525,8 @@ void OnTick()
    double swing;
    int trig = Trigger(dir, r, swing);
    if(trig == 0) return;
+   string fail = GateFail(dir, r, atrv);
+   if(fail != "") { PrintFormat("trigger %s skipped: gate '%s' failed", dir > 0 ? "BUY" : "SELL", fail); return; }
    OpenTrade(dir, swing, atrv, d1, h4, h1, r[1].time);
 }
 //+------------------------------------------------------------------+
